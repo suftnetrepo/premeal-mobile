@@ -1,5 +1,4 @@
 import { Animated, Easing } from "react-native";
-import { useEffect, useRef } from "react";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import { Stack, StyledText, StyledPressable } from "fluent-styles";
@@ -8,23 +7,16 @@ import { COLORS } from "../theme/colors";
 
 export type Tab = "home" | "order" | "search" | "addresses" | "account";
 
-// ─── Tab definitions ──────────────────────────────────────────────────────────
-// "order" is the primary CTA tab — styled differently (always has a label,
-// always shows the dark active pill) to match the screenshot's centred
-// "Pickup" tab which is the core action of the app.
-const TABS: { key: Tab; label: string; icon: string; primary?: boolean }[] = [
-  { key: "home",      label: "Home",      icon: "home"       },
-  { key: "order",     label: "Order",     icon: "shopping-bag", primary: true },
-  { key: "search",    label: "Search",    icon: "search"     },
-  { key: "addresses", label: "Addresses", icon: "map-pin"    },
-  { key: "account",   label: "Account",   icon: "user"       },
+const TABS: { key: Tab; label: string; icon: string }[] = [
+  { key: "home",      label: "Home",      icon: "home"          },
+  { key: "order",     label: "Order",     icon: "shopping-bag"  },
+  { key: "search",    label: "Search",    icon: "search"        },
+  { key: "addresses", label: "Addresses", icon: "map-pin"       },
+  { key: "account",   label: "Account",   icon: "user"          },
 ];
 
-// Amber/gold pill background — matches the screenshot's warm golden container.
-// Distinct from Pre-Meal's orange primary so the tab bar reads as a separate
-// UI layer, not a duplicate of buttons elsewhere on screen.
 const TAB_BG   = "#F5A623";
-const TAB_ICON = "#7A4F00"; // dark amber for inactive icons
+const TAB_ICON = "#7A4F00";
 
 function TabItem({
   tab,
@@ -35,31 +27,27 @@ function TabItem({
   active: boolean;
   onPress: () => void;
 }) {
-  const isPrimary = !!tab.primary;
-  const showActive = active || isPrimary;
-
-  // Subtle scale animation on press
-  const scale = useRef(new Animated.Value(1)).current;
+  const anim = new Animated.Value(1);
 
   function handlePress() {
     Animated.sequence([
-      Animated.timing(scale, { toValue: 0.88, duration: 80, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.spring(scale, { toValue: 1, friction: 4, useNativeDriver: true }),
+      Animated.timing(anim, { toValue: 0.88, duration: 80, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.spring(anim, { toValue: 1, friction: 4, useNativeDriver: true }),
     ]).start();
     onPress();
   }
 
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <StyledPressable onPress={handlePress} alignItems="center" gap={0} paddingHorizontal={4}>
-        {showActive ? (
-          // Dark pill — active state or primary tab
+    <Animated.View style={{ transform: [{ scale: anim }] }}>
+      <StyledPressable onPress={handlePress} alignItems="center" paddingHorizontal={4}>
+        {active ? (
+          // Active — dark pill with icon + label
           <Stack
             horizontal
             backgroundColor="#1C1917"
             borderRadius={999}
             paddingHorizontal={16}
-            paddingVertical={8}
+            paddingVertical={9}
             alignItems="center"
             justifyContent="center"
             gap={7}
@@ -70,7 +58,7 @@ function TabItem({
             </StyledText>
           </Stack>
         ) : (
-          // Icon only — inactive
+          // Inactive — icon only, no background, no label
           <Stack
             width={44}
             height={40}
@@ -90,17 +78,20 @@ export function BottomTabBar({ active }: { active: Tab }) {
 
   function go(tab: Tab) {
     if (tab === "home")      router.push("/");
-    if (tab === "order")     router.push("/");          // takes them to browse restaurants
-    if (tab === "search")    router.push("/");          // future: search screen
+    if (tab === "order")     router.push("/");
+    if (tab === "search")    router.push("/");
     if (tab === "addresses") router.push("/addresses");
     if (tab === "account")   router.push("/account");
   }
 
   return (
-    // Floating pill container — shadow gives it the lifted look from the screenshot
     <Stack
+      backgroundColor="transparent"
       paddingHorizontal={16}
-      paddingBottom={insets.bottom || 16}
+      // paddingBottom accounts for the home indicator (insets.bottom) plus
+      // extra breathing room so the pill sits just above the screen edge —
+      // same visual gap as the screenshot.
+      paddingBottom={(insets.bottom || 0) + 8}
       paddingTop={8}
     >
       <Stack
@@ -108,7 +99,7 @@ export function BottomTabBar({ active }: { active: Tab }) {
         backgroundColor={TAB_BG}
         borderRadius={999}
         paddingHorizontal={8}
-        paddingVertical={8}
+        paddingVertical={6}
         alignItems="center"
         justifyContent="space-between"
         style={{
