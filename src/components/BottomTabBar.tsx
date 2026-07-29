@@ -1,22 +1,23 @@
+import { useRef } from "react";
 import { Animated, Easing } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import { Stack, StyledText, StyledPressable } from "fluent-styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { COLORS } from "../theme/colors";
 
 export type Tab = "home" | "order" | "search" | "addresses" | "account";
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: "home",      label: "Home",      icon: "home"          },
-  { key: "order",     label: "Order",     icon: "shopping-bag"  },
+  { key: "order",     label: "Orders",    icon: "shopping-bag"  },
   { key: "search",    label: "Search",    icon: "search"        },
-  { key: "addresses", label: "Addresses", icon: "map-pin"       },
+  { key: "addresses", label: "Track",     icon: "map-pin"       },
   { key: "account",   label: "Account",   icon: "user"          },
 ];
 
-const TAB_BG   = "#F5A623";
-const TAB_ICON = "#7A4F00";
+const ACTIVE_BG    = "#1C1917";
+const ACTIVE_ICON  = "#EA580C";
+const INACTIVE_ICON = "#A8A29E";
 
 function TabItem({
   tab,
@@ -27,7 +28,7 @@ function TabItem({
   active: boolean;
   onPress: () => void;
 }) {
-  const anim = new Animated.Value(1);
+  const anim = useRef(new Animated.Value(1)).current;
 
   function handlePress() {
     Animated.sequence([
@@ -38,34 +39,47 @@ function TabItem({
   }
 
   return (
-    <Animated.View style={{ transform: [{ scale: anim }] }}>
-      <StyledPressable onPress={handlePress} alignItems="center" paddingHorizontal={4}>
+    <Animated.View style={{ transform: [{ scale: anim }], flex: 1 }}>
+      <StyledPressable
+        onPress={handlePress}
+        alignItems="center"
+        justifyContent="center"
+        accessibilityRole="button"
+        accessibilityLabel={tab.label}
+        accessibilityState={{ selected: active }}
+        style={{ minHeight: 44 }}
+      >
         {active ? (
-          // Active — dark pill with icon + label
+          // Active — dark pill, orange icon, white label
           <Stack
             horizontal
-            backgroundColor="#1C1917"
+            backgroundColor={ACTIVE_BG}
             borderRadius={999}
+            marginHorizontal={-8}
             paddingHorizontal={16}
-            paddingVertical={9}
+            paddingVertical={10}
             alignItems="center"
             justifyContent="center"
             gap={7}
           >
-            <Icon name={tab.icon as any} size={18} color="#FFFFFF" />
-            <StyledText fontSize={13} fontWeight="700" color="#FFFFFF">
+            <Icon name={tab.icon as any} size={19} color={ACTIVE_ICON} />
+            {/* <StyledText fontSize={13} fontWeight="700" color="#FFFFFF">
               {tab.label}
-            </StyledText>
+            </StyledText> */}
           </Stack>
         ) : (
-          // Inactive — icon only, no background, no label
+          // Inactive — icon stacked above a muted label
           <Stack
-            width={44}
-            height={40}
             alignItems="center"
             justifyContent="center"
+            gap={3}
+            paddingVertical={10}
+            paddingHorizontal={8}
           >
-            <Icon name={tab.icon as any} size={22} color={TAB_ICON} />
+            <Icon name={tab.icon as any} size={21} color={INACTIVE_ICON} />
+            {/* <StyledText fontSize={10.5} fontWeight="600" color={INACTIVE_ICON}>
+              {tab.label}
+            </StyledText> */}
           </Stack>
         )}
       </StyledPressable>
@@ -77,37 +91,33 @@ export function BottomTabBar({ active }: { active: Tab }) {
   const insets = useSafeAreaInsets();
 
   function go(tab: Tab) {
-    if (tab === "home")      router.push("/");
-    if (tab === "order")     router.push("/");
-    if (tab === "search")    router.push("/");
+    if (tab === "home")      router.replace("/results");
+    if (tab === "order")     router.replace("/results");
+    if (tab === "search")    router.replace("/results");
     if (tab === "addresses") router.push("/addresses");
     if (tab === "account")   router.push("/account");
   }
 
   return (
     <Stack
-      backgroundColor="transparent"
-      paddingHorizontal={16}
-      // paddingBottom accounts for the home indicator (insets.bottom) plus
-      // extra breathing room so the pill sits just above the screen edge —
-      // same visual gap as the screenshot.
-      paddingBottom={(insets.bottom || 0) + 8}
-      paddingTop={8}
+      marginHorizontal={24}
+      marginBottom={Math.max(insets.bottom, 12)}
+      marginTop={4}
     >
       <Stack
         horizontal
-        backgroundColor={TAB_BG}
+        backgroundColor="#FFFFFF"
         borderRadius={999}
-        paddingHorizontal={8}
+   
         paddingVertical={6}
         alignItems="center"
         justifyContent="space-between"
         style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 8,
+          shadowColor: "#1C1917",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 20,
+          elevation: 10,
         }}
       >
         {TABS.map((tab) => (

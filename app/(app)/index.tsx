@@ -1,20 +1,22 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
+  Animated,
   Dimensions,
+  Easing,
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
+import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import {
   StyledPage,
-  StyledHeader,
   StyledText,
   StyledPressable,
   StyledShape,
+  StyledImageBackground,
   Stack,
-  theme,
 } from "fluent-styles";
 import {
   useLocation,
@@ -28,30 +30,69 @@ import { AddressPickerPopup } from "../../src/components/AddressPickerPopup";
 import { COLORS } from "../../src/theme/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const H_PAD = 16;
+const H_PAD = 20;
+
+// ─── Shadows — every elevated surface shares one of these, no borders ─────────
+const SHADOW_SOFT = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.08,
+  shadowRadius: 10,
+  elevation: 3,
+};
+const SHADOW_CARD = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.07,
+  shadowRadius: 18,
+  elevation: 4,
+};
+const SHADOW_HERO = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 14 },
+  shadowOpacity: 0.18,
+  shadowRadius: 28,
+  elevation: 10,
+};
+const SHADOW_CTA = {
+  shadowColor: COLORS.primary,
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.35,
+  shadowRadius: 14,
+  elevation: 6,
+};
 
 // ─── Slides ───────────────────────────────────────────────────────────────────
 const SLIDES = [
   {
     key: "schedule",
     pill: "Scheduled delivery",
-    title: "Order ahead,\neat on time.",
+    titleLead: "Order ahead,\neat ",
+    titleHighlight: "on time.",
     subtitle: "Confirmed within 30 min",
     cta: "Explore now",
+    image:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
   },
   {
     key: "transparent",
     pill: "Fair pricing",
-    title: "No markups,\nno surprises.",
+    titleLead: "No markups,\nno ",
+    titleHighlight: "surprises.",
     subtitle: "You pay what the restaurant charges",
     cta: "See restaurants",
+    image:
+      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
   },
   {
     key: "reviews",
     pill: "Verified reviews",
-    title: "Reviews you\ncan trust.",
+    titleLead: "Reviews you\ncan ",
+    titleHighlight: "trust.",
     subtitle: "Every review is from a real delivery",
     cta: "Browse now",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
   },
 ];
 
@@ -70,7 +111,7 @@ const VALUE_PROPS: { icon: string; title: string; body: string }[] = [
     body: "Reviews come from orders actually delivered.",
   },
   {
-    icon: "check-circle",
+    icon: "zap",
     title: "Confirmed fast",
     body: "Restaurants respond within 30 minutes.",
   },
@@ -81,20 +122,75 @@ const VALUE_PROPS: { icon: string; title: string; body: string }[] = [
   },
 ];
 
-// ─── For restaurant owners — purely informational for now, no signup link
-// yet, so deliberately no button here (a dead CTA would be worse than none). ──
-const RESTAURANT_POINTS: string[] = [
-  "Keep 88% of every order — 12% commission on food only, never on delivery",
-  "Set your own delivery radius and fee",
-  "Deliver yourself, or invite your own drivers",
-  "One-time signup fee, no monthly subscription",
-];
-
 function addressIconName(label: string | null | undefined): string {
   const l = (label ?? "").toLowerCase();
   if (l === "home") return "home";
   if (l === "work") return "briefcase";
   return "map-pin";
+}
+
+// ─── Small press-scale wrapper — shared button/card feedback ──────────────────
+function ScalePressable({
+  onPress,
+  children,
+  style,
+}: {
+  onPress?: () => void;
+  children: React.ReactNode;
+  style?: any;
+}) {
+  const anim = useRef(new Animated.Value(1)).current;
+
+  function pressIn() {
+    Animated.timing(anim, {
+      toValue: 0.96,
+      duration: 90,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  }
+  function pressOut() {
+    Animated.spring(anim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+  }
+
+  return (
+    <Animated.View style={[style, { transform: [{ scale: anim }] }]}>
+      <StyledPressable
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+      >
+        {children}
+      </StyledPressable>
+    </Animated.View>
+  );
+}
+
+// ─── Fade-up mount animation ───────────────────────────────────────────────────
+function useFadeUp(delay = 0) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 420,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+    // Mount-only fade — no dependency on `anim` (stable ref).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return {
+    opacity: anim,
+    transform: [
+      {
+        translateY: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [16, 0],
+        }),
+      },
+    ],
+  };
 }
 
 export default function DiscoverScreen() {
@@ -106,6 +202,21 @@ export default function DiscoverScreen() {
   const { active, status, setActive } = useLocation();
   const { user } = useAuth();
   const cart = useCart();
+
+  const heroAnimStyle = useFadeUp(0);
+  const valuePropsAnimStyle = useFadeUp(120);
+
+  // Returning user — if location is already ready when this screen mounts
+  // (saved location loaded from SecureStore or saved addresses), skip straight
+  // to results. Only fires once on mount, not on every status change, to avoid
+  // conflicting with the tab bar's own router.replace("/results").
+  useEffect(() => {
+    if (status === "ready") {
+      router.replace("/results");
+    }
+    // Intentionally only on mount — no [status] dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleSliderScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
     const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
@@ -135,39 +246,38 @@ export default function DiscoverScreen() {
         : "Set your address";
 
   return (
-    <StyledPage showStatusBar backgroundColor={theme.colors.gray[1]}>
-      {/* ── Header ────────────────────────────────────────────────── */}
+    <StyledPage showStatusBar flex={1} backgroundColor={COLORS.bg}>
       <StyledPage.Header.Full>
-        <Stack
-          vertical
-          paddingHorizontal={H_PAD}
-          paddingTop={6}
-          paddingBottom={14}
-          gap={12}
-        >
+        <Stack paddingHorizontal={H_PAD} paddingTop={8} gap={16}>
           <Stack horizontal alignItems="center" justifyContent="space-between">
-            <Stack horizontal alignItems="center" gap={10}>
-              <StyledShape
-                size={48}
-                cycle
-                backgroundColor={user ? COLORS.primaryLight : COLORS.bgMuted}
-                borderWidth={user ? 2 : 0}
-                borderColor={COLORS.primary}
+            <Stack horizontal alignItems="center" gap={12} flex={1}>
+              <Stack
+                style={[
+                  { borderRadius: 24, backgroundColor: "#FFFFFF" },
+                  SHADOW_SOFT,
+                ]}
               >
-                <Icon
-                  name="user"
-                  size={18}
-                  color={user ? COLORS.primary : COLORS.textMuted}
-                />
-              </StyledShape>
-              <Stack gap={2}>
-                <StyledText fontSize={10} color={COLORS.textMuted}>
+                <StyledShape size={48} cycle backgroundColor="transparent">
+                  <Icon
+                    name="user"
+                    size={19}
+                    color={user ? COLORS.primary : COLORS.textMuted}
+                  />
+                </StyledShape>
+              </Stack>
+              <Stack gap={2} flex={1}>
+                <StyledText
+                  fontSize={10.5}
+                  fontWeight="700"
+                  color={COLORS.textMuted}
+                  style={{ letterSpacing: 0.6, textTransform: "uppercase" }}
+                >
                   Delivering to
                 </StyledText>
                 <StyledPressable
                   flexDirection="row"
                   alignItems="center"
-                  gap={4}
+                  gap={5}
                   onPress={() => openPicker("list")}
                 >
                   <Icon
@@ -176,50 +286,64 @@ export default function DiscoverScreen() {
                         ? (addressIconName(active.label) as any)
                         : "map-pin"
                     }
-                    size={12}
+                    size={13}
                     color={COLORS.primary}
                   />
                   <StyledText
-                    fontSize={13}
-                    fontWeight="700"
+                    fontSize={16}
+                    fontWeight="800"
                     color={COLORS.textPrimary}
                     numberOfLines={1}
-                    style={{ maxWidth: SCREEN_WIDTH - 160 }}
+                    style={{ maxWidth: SCREEN_WIDTH - 190, letterSpacing: -0.2 }}
                   >
                     {pillLabel}
                   </StyledText>
-                  <Icon name="chevron-down" size={12} color={COLORS.primary} />
+                  <Icon name="chevron-down" size={14} color={COLORS.primary} />
                 </StyledPressable>
               </Stack>
             </Stack>
-            <StyledPressable>
-              <StyledShape
-                size={48}
-                cycle
-                borderWidth={user ? 2 : 1}
-                borderColor={COLORS.primaryDark}
-              >
-                <Icon name="bell" size={18} color={COLORS.textPrimary} />
-              </StyledShape>
+            <StyledPressable
+              style={[
+                {
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                SHADOW_SOFT,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
+              <Icon name="bell" size={19} color={COLORS.textPrimary} />
             </StyledPressable>
           </Stack>
 
-          <StyledPressable
-            flexDirection="row"
-            alignItems="center"
-            gap={10}
-            borderWidth={1}
-            borderColor={COLORS.border}
-            borderRadius={12}
-            paddingHorizontal={14}
-            paddingVertical={11}
-            backgroundColor={COLORS.bgMuted}
-            onPress={() => openPicker("search")}
-          >
-            <Icon name="search" size={15} color={COLORS.textMuted} />
-            <StyledText fontSize={13} color={COLORS.textMuted}>
-              Search by address to see restaurants…
-            </StyledText>
+          <StyledPressable onPress={() => openPicker("search")}>
+            <Stack
+              horizontal
+              alignItems="center"
+              gap={10}
+              borderRadius={999}
+              paddingHorizontal={18}
+              paddingVertical={14}
+              backgroundColor="#FFFFFF"
+              style={SHADOW_SOFT}
+            >
+              <Icon name="search" size={16} color={COLORS.textMuted} />
+              <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
+                Search by address to see restaurants…
+              </StyledText>
+              <Stack
+                width={1}
+                height={20}
+                backgroundColor={COLORS.border}
+                marginHorizontal={2}
+              />
+              <Icon name="sliders" size={16} color={COLORS.textMuted} />
+            </Stack>
           </StyledPressable>
         </Stack>
       </StyledPage.Header.Full>
@@ -227,224 +351,185 @@ export default function DiscoverScreen() {
       {/* ── Body ─────────────────────────────────────────────────── */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: 28 }}
       >
         {/* Hero slider */}
-        <Stack height={206} overflow="hidden">
-          <ScrollView
-            ref={sliderRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEventThrottle={16}
-            onMomentumScrollEnd={handleSliderScroll}
-            style={{ width: SCREEN_WIDTH }}
-          >
-            {SLIDES.map((slide) => (
-              <Stack
-                key={slide.key}
-                width={SCREEN_WIDTH}
-                paddingHorizontal={H_PAD}
-              >
-                <StyledPressable
-                  flex={1}
-                  onPress={() => openPicker(active ? "list" : "search")}
-                  backgroundColor={COLORS.primary}
-                  borderRadius={20}
-                  overflow="hidden"
-                  justifyContent="flex-end"
-                  padding={20}
+        <Animated.View style={heroAnimStyle}>
+          <Stack height={244} overflow="hidden">
+            <ScrollView
+              ref={sliderRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              onMomentumScrollEnd={handleSliderScroll}
+              style={{ width: SCREEN_WIDTH }}
+            >
+              {SLIDES.map((slide) => (
+                <Stack
+                  key={slide.key}
+                  width={SCREEN_WIDTH}
+                  paddingHorizontal={H_PAD}
                 >
-                  <Stack
-                    position="absolute"
-                    top={-20}
-                    right={-20}
-                    width={130}
-                    height={130}
-                    borderRadius={65}
-                    backgroundColor="rgba(255,255,255,0.10)"
-                  />
-                  <Stack
-                    position="absolute"
-                    top={40}
-                    right={50}
-                    width={80}
-                    height={80}
-                    borderRadius={40}
-                    backgroundColor="rgba(255,255,255,0.07)"
-                  />
-                  <Stack
-                    position="absolute"
-                    bottom={-30}
-                    right={20}
-                    width={110}
-                    height={110}
-                    borderRadius={55}
-                    backgroundColor="rgba(255,255,255,0.07)"
-                  />
-                  <Stack gap={6} style={{ zIndex: 1 }}>
-                    <Stack
-                      backgroundColor="rgba(255,255,255,0.22)"
-                      borderRadius={999}
-                      paddingHorizontal={10}
-                      paddingVertical={4}
-                      alignSelf="flex-start"
+                  <ScalePressable
+                    onPress={() => openPicker(active ? "list" : "search")}
+                    style={[
+                      {
+                        flex: 1,
+                        borderRadius: 28,
+                        overflow: "hidden",
+                        backgroundColor: "#1C1917",
+                      },
+                      SHADOW_HERO,
+                    ]}
+                  >
+                    <StyledImageBackground
+                      source={{ uri: slide.image }}
+                      flex={1}
+                      justifyContent="flex-end"
                     >
-                      <StyledText
-                        fontSize={11}
-                        fontWeight="700"
-                        color="#FFFFFF"
+                      <Svg
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                        }}
                       >
-                        {slide.pill}
-                      </StyledText>
-                    </Stack>
-                    <StyledText
-                      fontSize={20}
-                      fontWeight="800"
-                      color="#FFFFFF"
-                      lineHeight={26}
-                      style={{ letterSpacing: -0.3 }}
-                    >
-                      {slide.title}
-                    </StyledText>
-                    <StyledText fontSize={13} color="rgba(255,255,255,0.85)">
-                      {slide.subtitle}
-                    </StyledText>
-                    <Stack
-                      backgroundColor="#1C1917"
-                      borderRadius={999}
-                      paddingHorizontal={18}
-                      paddingVertical={9}
-                      alignSelf="flex-start"
-                      marginTop={2}
-                    >
-                      <StyledText
-                        fontSize={13}
-                        fontWeight="700"
-                        color="#FFFFFF"
-                      >
-                        {slide.cta}
-                      </StyledText>
-                    </Stack>
-                  </Stack>
-                </StyledPressable>
-              </Stack>
-            ))}
-          </ScrollView>
-        </Stack>
+                        <Defs>
+                          <LinearGradient id="hero" x1="0" y1="0" x2="1" y2="0.15">
+                            <Stop offset="0" stopColor="#0C0A09" stopOpacity={0.96} />
+                            <Stop offset="0.5" stopColor="#0C0A09" stopOpacity={0.82} />
+                            <Stop offset="0.78" stopColor="#0C0A09" stopOpacity={0.28} />
+                            <Stop offset="1" stopColor="#0C0A09" stopOpacity={0} />
+                          </LinearGradient>
+                        </Defs>
+                        <Rect width="100%" height="100%" fill="url(#hero)" />
+                      </Svg>
+                      <Stack padding={24} gap={8} style={{ maxWidth: "68%" }}>
+                        <Stack
+                          backgroundColor="rgba(255,255,255,0.16)"
+                          borderRadius={999}
+                          paddingHorizontal={12}
+                          paddingVertical={5}
+                          alignSelf="flex-start"
+                        >
+                          <StyledText fontSize={11} fontWeight="700" color="#FFFFFF">
+                            {slide.pill}
+                          </StyledText>
+                        </Stack>
+                        <StyledText
+                          fontSize={23}
+                          fontWeight="800"
+                          lineHeight={28}
+                          style={{ letterSpacing: -0.4 }}
+                        >
+                          <StyledText fontSize={23} fontWeight="800" color="#FFFFFF">
+                            {slide.titleLead}
+                          </StyledText>
+                          <StyledText fontSize={23} fontWeight="800" color={COLORS.primary}>
+                            {slide.titleHighlight}
+                          </StyledText>
+                        </StyledText>
+                        <StyledText fontSize={13} color="rgba(255,255,255,0.82)">
+                          {slide.subtitle}
+                        </StyledText>
+                        <Stack
+                          horizontal
+                          alignItems="center"
+                          gap={6}
+                          backgroundColor={COLORS.primary}
+                          borderRadius={999}
+                          paddingHorizontal={20}
+                          paddingVertical={11}
+                          alignSelf="flex-start"
+                          marginTop={6}
+                          style={SHADOW_CTA}
+                        >
+                          <StyledText fontSize={13.5} fontWeight="700" color="#FFFFFF">
+                            {slide.cta}
+                          </StyledText>
+                          <Icon name="arrow-right" size={14} color="#FFFFFF" />
+                        </Stack>
+                      </Stack>
+                    </StyledImageBackground>
+                  </ScalePressable>
+                </Stack>
+              ))}
+            </ScrollView>
+          </Stack>
 
-        <Stack
-          horizontal
-          justifyContent="center"
-          alignItems="center"
-          gap={5}
-          marginTop={10}
-          marginBottom={22}
-        >
-          {SLIDES.map((_, i) => (
-            <Stack
-              key={i}
-              width={i === slideIndex ? 18 : 6}
-              height={6}
-              borderRadius={3}
-              backgroundColor={
-                i === slideIndex ? COLORS.primary : COLORS.border
-              }
-            />
-          ))}
-        </Stack>
+          <Stack
+            horizontal
+            justifyContent="center"
+            alignItems="center"
+            gap={6}
+            marginTop={14}
+            marginBottom={28}
+          >
+            {SLIDES.map((_, i) => (
+              <Stack
+                key={i}
+                width={i === slideIndex ? 22 : 6}
+                height={6}
+                borderRadius={3}
+                backgroundColor={i === slideIndex ? COLORS.primary : COLORS.border}
+              />
+            ))}
+          </Stack>
+        </Animated.View>
 
         {/* ── Platform value props ───────────────────────────────── */}
-        <Stack paddingHorizontal={H_PAD} marginBottom={24}>
-          <StyledText
-            fontSize={18}
-            fontWeight="800"
-            color={COLORS.textPrimary}
-            marginBottom={12}
-          >
-            Why Pre-Meal
-          </StyledText>
-          <Stack horizontal flexWrap="wrap" gap={10}>
-            {VALUE_PROPS.map((v) => (
-              <Stack
-                key={v.title}
-                width="47%"
-                backgroundColor={COLORS.bgCard}
-                borderRadius={16}
-                borderWidth={0.5}
-                borderColor={COLORS.border}
-                padding={14}
-                gap={8}
-              >
-                <StyledShape
-                  size={34}
-                  borderRadius={17}
-                  backgroundColor={COLORS.primaryLight}
-                >
-                  <Icon name={v.icon as any} size={16} color={COLORS.primary} />
-                </StyledShape>
-                <StyledText
-                  fontSize={13}
-                  fontWeight="700"
-                  color={COLORS.textPrimary}
-                >
-                  {v.title}
-                </StyledText>
-                <StyledText
-                  fontSize={12}
-                  color={COLORS.textMuted}
-                  lineHeight={16}
-                >
-                  {v.body}
-                </StyledText>
-              </Stack>
-            ))}
-          </Stack>
-        </Stack>
-
-        {/* ── For restaurant owners — informational only ─────────── */}
-        <Stack
-          marginHorizontal={H_PAD}
-          marginBottom={12}
-          borderRadius={18}
-          overflow="hidden"
-          backgroundColor="#1C1917"
-          padding={20}
-          gap={12}
-        >
-          <Stack horizontal alignItems="center" gap={8}>
-            <StyledShape
-              size={30}
-              borderRadius={15}
-              backgroundColor="rgba(255,255,255,0.12)"
+        <Animated.View style={valuePropsAnimStyle}>
+          <Stack paddingHorizontal={H_PAD} marginBottom={24}>
+            <StyledText
+              fontSize={21}
+              fontWeight="800"
+              color={COLORS.textPrimary}
+              marginBottom={16}
+              style={{ letterSpacing: -0.3 }}
             >
-              <Icon name="briefcase" size={14} color="#FFFFFF" />
-            </StyledShape>
-            <StyledText fontSize={15} fontWeight="800" color="#FFFFFF">
-              Own a restaurant?
+              ✨ Why Pre-Meal
             </StyledText>
-          </Stack>
-          <Stack gap={8}>
-            {RESTAURANT_POINTS.map((point) => (
-              <Stack key={point} horizontal alignItems="flex-start" gap={8}>
-                <Icon
-                  name="check"
-                  size={13}
-                  color={COLORS.primary}
-                  style={{ marginTop: 2 }}
-                />
-                <StyledText
-                  fontSize={13}
-                  color="rgba(255,255,255,0.85)"
-                  lineHeight={18}
-                  flex={1}
+            <Stack horizontal flexWrap="wrap" gap={14}>
+              {VALUE_PROPS.map((v) => (
+                <Stack
+                  key={v.title}
+                  width="47%"
+                  backgroundColor={COLORS.bgCard}
+                  borderRadius={22}
+                  padding={18}
+                  gap={10}
+                  style={SHADOW_CARD}
                 >
-                  {point}
-                </StyledText>
-              </Stack>
-            ))}
+                  <StyledShape
+                    size={52}
+                    cycle
+                    backgroundColor={COLORS.primaryLight}
+                  >
+                    <Icon name={v.icon as any} size={22} color={COLORS.primary} />
+                  </StyledShape>
+                  <StyledText
+                    fontSize={14.5}
+                    fontWeight="800"
+                    color={COLORS.textPrimary}
+                    style={{ letterSpacing: -0.1 }}
+                  >
+                    {v.title}
+                  </StyledText>
+                  <StyledText
+                    fontSize={12.5}
+                    color={COLORS.textMuted}
+                    lineHeight={17}
+                  >
+                    {v.body}
+                  </StyledText>
+                </Stack>
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
+        </Animated.View>
       </ScrollView>
 
       {cart.itemCount > 0 && <BasketBar />}

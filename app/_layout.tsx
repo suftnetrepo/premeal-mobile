@@ -6,7 +6,7 @@ import { GlobalPortalProvider, PortalManager } from "fluent-styles";
 import { AuthProvider, useAuth } from "../src/auth/AuthContext";
 import { CartProvider } from "../src/cart/CartContext";
 import { OnboardingProvider, useOnboarding } from "../src/onboarding/OnboardingContext";
-import { LocationProvider } from "../src/location/LocationContext";
+import { LocationProvider, useLocation } from "../src/location/LocationContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,28 +50,42 @@ const PROTECTED_APP_ROUTES = new Set(["basket", "checkout", "orders", "addresses
 function RouteGuard({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
   const { hasOnboarded } = useOnboarding();
-  const segments = useSegments();
+ const segments = useSegments() as string[];
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading || hasOnboarded === null) return;
 
-    const inOnboardingGroup = segments[0] === "(onboarding)";
-    const inAuthGroup = segments[0] === "(auth)";
-    const inProtectedAppRoute = segments[0] === "(app)" && PROTECTED_APP_ROUTES.has(segments[1] ?? "");
+    const inOnboardingGroup  = segments[0] === "(onboarding)";
+    const inAuthGroup        = segments[0] === "(auth)";
+    const inAppGroup         = segments[0] === "(app)";
+    const currentScreen      = segments[1] ?? "";
+    const inProtectedAppRoute = inAppGroup && PROTECTED_APP_ROUTES.has(currentScreen);
 
+    // 1. Onboarding gate — always first
     if (!hasOnboarded && !inOnboardingGroup) {
       router.replace("/welcome");
       return;
     }
 
-    if (hasOnboarded) {
-      if (!user && inProtectedAppRoute) {
-        router.replace("/login");
-      } else if (user && (inAuthGroup || inOnboardingGroup)) {
-        router.replace("/");
-      }
+    // 2. Auth gate — protected routes need a user
+    if (hasOnboarded && !user && inProtectedAppRoute) {
+      router.replace("/login");
+      return;
     }
+
+    // 3. Auth redirect — logged-in user lands on auth/onboarding screens
+    if (hasOnboarded && user && (inAuthGroup || inOnboardingGroup)) {
+      router.replace("/");
+      return;
+    }
+
+    // 4. Nothing else — location routing is handled by index.tsx directly.
+    //    index.tsx calls router.push("/results") when a location is selected,
+    //    and redirects returning users with a saved location on mount.
+    //    Doing it here too caused a race: RouteGuard fired router.replace("/")
+    //    right after index.tsx fired router.push("/results"), winning the race
+    //    and sending the user back to index instead of results.
   }, [user, isLoading, hasOnboarded, segments, router]);
 
   return <>{children}</>;

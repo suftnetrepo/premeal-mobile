@@ -1,15 +1,13 @@
-import { useState } from "react";
-import { ActivityIndicator, ScrollView, Dimensions } from "react-native";
+import { useRef, useState } from "react";
+import { ActivityIndicator, Animated, Dimensions, Easing, ScrollView } from "react-native";
+import { BlurView } from "expo-blur";
+import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import {
   StyledPage,
-  theme,
   StyledText,
   StyledPressable,
-  StyledBadge,
-  StyledSeperator,
-  StyledImageBackground,
   StyledShape,
   Stack,
 } from "fluent-styles";
@@ -24,9 +22,31 @@ import { formatMoney } from "../../src/lib/format";
 import { COLORS } from "../../src/theme/colors";
 import type { Restaurant } from "../../src/api/types";
 
-const H_PAD = 16;
+const H_PAD = 20;
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CARD_W = SCREEN_WIDTH * 0.58;
+
+// ─── Shadows — every elevated surface uses one of these, no borders ───────────
+const SHADOW_SOFT = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.08,
+  shadowRadius: 10,
+  elevation: 3,
+};
+const SHADOW_CHIP = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.06,
+  shadowRadius: 10,
+  elevation: 2,
+};
+const SHADOW_CARD = {
+  shadowColor: "#1C1917",
+  shadowOffset: { width: 0, height: 10 },
+  shadowOpacity: 0.09,
+  shadowRadius: 22,
+  elevation: 5,
+};
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function addressIconName(label: string | null | undefined): string {
@@ -36,7 +56,103 @@ function addressIconName(label: string | null | undefined): string {
   return "map-pin";
 }
 
-// ─── Cuisine chip ─────────────────────────────────────────────────────────────
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+// ─── Small press-scale wrapper — shared button/card feedback ──────────────────
+function ScalePressable({
+  onPress,
+  children,
+  style,
+  toValue = 0.96,
+}: {
+  onPress?: () => void;
+  children: React.ReactNode;
+  style?: any;
+  toValue?: number;
+}) {
+  const anim = useRef(new Animated.Value(1)).current;
+
+  function pressIn() {
+    Animated.timing(anim, {
+      toValue,
+      duration: 90,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  }
+  function pressOut() {
+    Animated.spring(anim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+  }
+
+  return (
+    <Animated.View style={[style, { transform: [{ scale: anim }] }]}>
+      <StyledPressable onPress={onPress} onPressIn={pressIn} onPressOut={pressOut}>
+        {children}
+      </StyledPressable>
+    </Animated.View>
+  );
+}
+
+// ─── Fade-up mount animation ───────────────────────────────────────────────────
+function useFadeUp(delay = 0) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useState(() => {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 420,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  });
+  return {
+    opacity: anim,
+    transform: [
+      { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
+    ],
+  };
+}
+
+// ─── Image that fades + scales in once loaded, instead of a blank flash ───────
+function FadeImage({ uri, height }: { uri: string; height: number }) {
+  const anim = useRef(new Animated.Value(0)).current;
+
+  function onLoad() {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }
+
+  return (
+    <Stack height={height} overflow="hidden" backgroundColor={COLORS.bgMuted}>
+      <Animated.Image
+        source={{ uri }}
+        onLoad={onLoad}
+        resizeMode="cover"
+        style={{
+          width: "100%",
+          height: "100%",
+          opacity: anim,
+          transform: [
+            {
+              scale: anim.interpolate({ inputRange: [0, 1], outputRange: [1.06, 1] }),
+            },
+          ],
+        }}
+      />
+    </Stack>
+  );
+}
+
+// ─── Cuisine chip — rounded rect, gradient when selected ──────────────────────
 function CuisineChip({
   label,
   emoji,
@@ -49,99 +165,151 @@ function CuisineChip({
   onPress: () => void;
 }) {
   return (
-    <StyledPressable
-      onPress={onPress}
-      alignItems="center"
-      gap={6}
-      marginRight={12}
-    >
-      <StyledShape
-        size={60}
-        cycle
-        borderRadius={16}
-        backgroundColor={active ? COLORS.primary : "#1C1917"}
+    <ScalePressable onPress={onPress} style={{ marginRight: 12 }}>
+      <Stack
+        width={78}
+        alignItems="center"
+        justifyContent="center"
+        borderRadius={22}
+        paddingVertical={14}
+        paddingHorizontal={8}
+        gap={8}
+        overflow="hidden"
+        backgroundColor={active ? COLORS.primary : "#FFFFFF"}
+        style={active ? SHADOW_CTA_CHIP : SHADOW_CHIP}
       >
-        <StyledText fontSize={24}>{emoji}</StyledText>
-      </StyledShape>
-      <StyledText
-        fontSize={12}
-        fontWeight={active ? "700" : "400"}
-        color={active ? COLORS.primary : COLORS.textSecondary}
-      >
-        {label}
-      </StyledText>
-    </StyledPressable>
+        {active && (
+          <Svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Defs>
+              <LinearGradient id={`chip-${label}`} x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#FB923C" stopOpacity={1} />
+                <Stop offset="1" stopColor={COLORS.primaryDark} stopOpacity={1} />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill={`url(#chip-${label})`} />
+          </Svg>
+        )}
+        <StyledShape
+          size={40}
+          cycle
+          backgroundColor={active ? "rgba(255,255,255,0.22)" : COLORS.primaryLight}
+        >
+          <StyledText fontSize={20}>{emoji}</StyledText>
+        </StyledShape>
+        <StyledText
+          fontSize={11.5}
+          fontWeight={active ? "800" : "600"}
+          color={active ? "#FFFFFF" : COLORS.textSecondary}
+          numberOfLines={1}
+        >
+          {label}
+        </StyledText>
+      </Stack>
+    </ScalePressable>
   );
 }
+const SHADOW_CTA_CHIP = {
+  shadowColor: COLORS.primary,
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  elevation: 4,
+};
 
-// ─── Horizontal restaurant card ───────────────────────────────────────────────
+// ─── Restaurant photo pool — used only when a restaurant has no uploaded
+// photo yet, keyed off the id so the same restaurant always gets the same
+// placeholder rather than a random one on every render. ────────────────────────
 const CARD_IMAGES = [
-  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=700&q=80",
-  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=700&q=80",
-  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=700&q=80",
-  "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=700&q=80",
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80",
+  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=900&q=80",
+  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&q=80",
+  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=900&q=80",
+  "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=900&q=80",
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=80",
 ];
 
-function HorizontalCard({
-  item,
-  onPress,
-}: {
-  item: Restaurant;
-  onPress: () => void;
-}) {
+// ─── Restaurant card ────────────────────────────────────────────────────────
+function RestaurantCard({ item, onPress }: { item: Restaurant; onPress: () => void }) {
+  const [saved, setSaved] = useState(false);
+  const heartAnim = useRef(new Animated.Value(1)).current;
   const image =
-    item.imageUrl ??
-    CARD_IMAGES[Math.abs(item.id.charCodeAt(0)) % CARD_IMAGES.length];
+    item.imageUrl ?? CARD_IMAGES[Math.abs(item.id.charCodeAt(0)) % CARD_IMAGES.length];
+
+  function toggleSaved() {
+    setSaved((s) => !s);
+    Animated.sequence([
+      Animated.timing(heartAnim, { toValue: 1.25, duration: 100, useNativeDriver: true }),
+      Animated.spring(heartAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
+    ]).start();
+  }
+
   return (
-    <StyledPressable
+    <ScalePressable
       onPress={onPress}
-      width={CARD_W}
-      marginRight={14}
-      borderRadius={18}
-      overflow="hidden"
-      backgroundColor={COLORS.bgCard}
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        elevation: 3,
-      }}
+      toValue={0.98}
+      style={[
+        {
+          marginBottom: 24,
+          borderRadius: 30,
+          overflow: "hidden",
+          backgroundColor: COLORS.bgCard,
+        },
+        SHADOW_CARD,
+      ]}
     >
-      {/* Photo */}
-      <Stack height={155} overflow="hidden">
-        <StyledImageBackground
-          source={{ uri: image }}
-          height={155}
-          resizeMode="cover"
-        />
-        {/* Heart */}
-        <StyledPressable
-          position="absolute"
-          top={10}
-          right={10}
-          width={32}
-          height={32}
-          borderRadius={16}
-          backgroundColor="rgba(255,255,255,0.92)"
-          alignItems="center"
-          justifyContent="center"
+      {/* Photo — ~60% of card height */}
+      <Stack position="relative">
+        <FadeImage uri={image} height={210} />
+
+        {/* Legibility gradient so the "Slots open" chip reads on any photo */}
+        <Svg
+          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 90 }}
         >
-          <Icon name="heart" size={14} color={COLORS.textMuted} />
-        </StyledPressable>
-        {/* Time badge */}
+          <Defs>
+            <LinearGradient id={`card-${item.id}`} x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor="#000000" stopOpacity={0} />
+              <Stop offset="1" stopColor="#000000" stopOpacity={0.35} />
+            </LinearGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill={`url(#card-${item.id})`} />
+        </Svg>
+
+        {/* Favourite — frosted glass */}
+        <Stack position="absolute" top={14} right={14} borderRadius={20} overflow="hidden" style={SHADOW_SOFT}>
+          <BlurView intensity={45} tint="light">
+            <StyledPressable
+              onPress={toggleSaved}
+              width={40}
+              height={40}
+              alignItems="center"
+              justifyContent="center"
+              accessibilityRole="button"
+              accessibilityLabel={saved ? "Remove from favourites" : "Add to favourites"}
+            >
+              <Animated.View style={{ transform: [{ scale: heartAnim }] }}>
+                <Icon
+                  name="heart"
+                  size={17}
+                  color={saved ? COLORS.primary : "#FFFFFF"}
+                  style={saved ? undefined : { opacity: 0.95 }}
+                />
+              </Animated.View>
+            </StyledPressable>
+          </BlurView>
+        </Stack>
+
+        {/* Slots badge */}
         <Stack
           position="absolute"
-          bottom={10}
-          left={10}
-          flexDirection="row"
+          bottom={14}
+          left={14}
+          horizontal
           alignItems="center"
-          gap={4}
-          backgroundColor="rgba(255,255,255,0.92)"
+          gap={5}
+          backgroundColor="rgba(255,255,255,0.94)"
           borderRadius={999}
-          paddingHorizontal={10}
-          paddingVertical={5}
+          paddingHorizontal={11}
+          paddingVertical={6}
+          flexWrap="nowrap"
         >
           <Icon name="clock" size={11} color={COLORS.textPrimary} />
           <StyledText fontSize={11} fontWeight="700" color={COLORS.textPrimary}>
@@ -151,48 +319,40 @@ function HorizontalCard({
       </Stack>
 
       {/* Info */}
-      <Stack padding={12} gap={5}>
+      <Stack padding={18} gap={8}>
         <StyledText
-          fontSize={15}
+          fontSize={19}
           fontWeight="800"
           color={COLORS.textPrimary}
           numberOfLines={1}
+          style={{ letterSpacing: -0.3 }}
         >
           {item.name}
         </StyledText>
 
-        <Stack
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Stack flexDirection="row" alignItems="center" gap={5}>
-            <StyledShape
-              size={18}
-              borderRadius={4}
-              backgroundColor={COLORS.primaryLight}
-            >
-              <Icon name="shopping-bag" size={10} color={COLORS.primary} />
-            </StyledShape>
-            <StyledText
-              fontSize={12}
-              color={COLORS.textSecondary}
-              numberOfLines={1}
-            >
-              {item.cuisine}
-            </StyledText>
-          </Stack>
+        <Stack horizontal alignItems="center" gap={6} flexWrap="wrap">
+          <StyledText fontSize={13} color={COLORS.textMuted}>
+            {item.cuisine}
+          </StyledText>
+          {item.distanceKm != null && (
+            <>
+              <StyledText fontSize={12} color={COLORS.border}>
+                ·
+              </StyledText>
+              <StyledText fontSize={13} color={COLORS.textMuted}>
+                {item.distanceKm < 1
+                  ? `${Math.round(item.distanceKm * 1000)} m`
+                  : `${item.distanceKm.toFixed(1)} km`}
+              </StyledText>
+            </>
+          )}
           {item.averageRating !== null && (
-            <Stack flexDirection="row" alignItems="center" gap={3}>
-              <Icon name="star" size={11} color="#F59E0B" />
-              <StyledText
-                fontSize={12}
-                fontWeight="700"
-                color={COLORS.textPrimary}
-              >
+            <Stack horizontal alignItems="center" gap={3} marginLeft={2}>
+              <Icon name="star" size={12} color="#F59E0B" />
+              <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
                 {item.averageRating.toFixed(1)}
               </StyledText>
-              <StyledText fontSize={11} color={COLORS.textMuted}>
+              <StyledText fontSize={12} color={COLORS.textMuted}>
                 ({item.reviewCount}+)
               </StyledText>
             </Stack>
@@ -200,217 +360,46 @@ function HorizontalCard({
         </Stack>
 
         <Stack
-          flexDirection="row"
+          horizontal
           alignItems="center"
           justifyContent="space-between"
+          marginTop={4}
         >
-          <StyledText fontSize={12} fontWeight="600" color={COLORS.primary}>
-            {item.deliveryFeeCents === 0
-              ? "Free delivery"
-              : `${formatMoney(item.deliveryFeeCents)} delivery`}
-          </StyledText>
+          {item.deliveryFeeCents === 0 ? (
+            <StyledText fontSize={13.5} fontWeight="700" color={COLORS.primary}>
+              Free delivery
+            </StyledText>
+          ) : (
+            <Stack horizontal alignItems="center" gap={5}>
+              <StyledText fontSize={13}>🚴</StyledText>
+              <StyledText fontSize={13} color={COLORS.textMuted}>
+                Delivery
+              </StyledText>
+              <StyledText fontSize={13.5} fontWeight="700" color={COLORS.primary}>
+                {formatMoney(item.deliveryFeeCents)}
+              </StyledText>
+            </Stack>
+          )}
           <Stack
             backgroundColor="#1C1917"
             borderRadius={999}
-            paddingHorizontal={12}
-            paddingVertical={5}
+            paddingHorizontal={14}
+            paddingVertical={7}
+            style={{
+              shadowColor: "#1C1917",
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.2,
+              shadowRadius: 6,
+              elevation: 2,
+            }}
           >
             <StyledText fontSize={12} fontWeight="700" color="#FFFFFF">
-              {item.minOrderCents === 0
-                ? "No min."
-                : `Min ${formatMoney(item.minOrderCents)}`}
+              {item.minOrderCents === 0 ? "No min." : `Min ${formatMoney(item.minOrderCents)}`}
             </StyledText>
           </Stack>
         </Stack>
       </Stack>
-    </StyledPressable>
-  );
-}
-
-// ─── Compact vertical restaurant row ─────────────────────────────────────────
-function RestaurantRow({
-  item,
-  onPress,
-}: {
-  item: Restaurant;
-  onPress: () => void;
-}) {
-  const image =
-    item.imageUrl ??
-    CARD_IMAGES[Math.abs(item.id.charCodeAt(0)) % CARD_IMAGES.length];
-  return (
-    <StyledPressable
-      onPress={onPress}
-      flexDirection="row"
-      alignItems="center"
-      gap={14}
-      marginBottom={12}
-      padding={12}
-      borderRadius={16}
-      backgroundColor={COLORS.bgCard}
-      borderWidth={0.5}
-      borderColor={COLORS.border}
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        elevation: 2,
-      }}
-    >
-      <Stack
-        width={72}
-        height={72}
-        borderRadius={14}
-        overflow="hidden"
-        backgroundColor={COLORS.primaryLight}
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-      >
-        {item.imageUrl ? (
-          <StyledImageBackground
-            source={{ uri: image }}
-            height={72}
-            resizeMode="cover"
-            style={{ width: 72 }}
-          />
-        ) : (
-          <StyledText fontSize={28}>{cuisineEmoji(item.cuisine)}</StyledText>
-        )}
-      </Stack>
-
-      <Stack flex={1} gap={4}>
-        <StyledText
-          fontSize={15}
-          fontWeight="700"
-          color={COLORS.textPrimary}
-          numberOfLines={1}
-        >
-          {item.name}
-        </StyledText>
-        <Stack flexDirection="row" alignItems="center" gap={5}>
-          {item.averageRating !== null ? (
-            <>
-              <Icon name="star" size={12} color="#F59E0B" />
-              <StyledText
-                fontSize={12}
-                fontWeight="700"
-                color={COLORS.textPrimary}
-              >
-                {item.averageRating.toFixed(1)}
-              </StyledText>
-              <StyledText fontSize={12} color={COLORS.textMuted}>
-                · {item.cuisine}
-              </StyledText>
-            </>
-          ) : (
-            <StyledText fontSize={12} color={COLORS.textMuted}>
-              New · {item.cuisine}
-            </StyledText>
-          )}
-        </Stack>
-        <Stack flexDirection="row" alignItems="center" gap={6}>
-          <Stack flexDirection="row" alignItems="center" gap={4}>
-            <Icon name="truck" size={11} color={COLORS.textMuted} />
-            <StyledText fontSize={11} color={COLORS.textMuted}>
-              {item.deliveryFeeCents === 0
-                ? "Free delivery"
-                : `${formatMoney(item.deliveryFeeCents)} delivery`}
-            </StyledText>
-          </Stack>
-          <StyledText fontSize={11} color={COLORS.border}>
-            ·
-          </StyledText>
-          <StyledText fontSize={11} color={COLORS.textMuted}>
-            {item.minOrderCents === 0
-              ? "No min."
-              : `Min. ${formatMoney(item.minOrderCents)}`}
-          </StyledText>
-        </Stack>
-      </Stack>
-
-      <Icon name="chevron-right" size={16} color={COLORS.border} />
-    </StyledPressable>
-  );
-}
-
-// ─── Promo banner ─────────────────────────────────────────────────────────────
-function PromoBanner() {
-  return (
-    <Stack
-      marginHorizontal={H_PAD}
-      borderRadius={20}
-      backgroundColor={COLORS.primary}
-      overflow="hidden"
-      height={160}
-      justifyContent="center"
-      padding={20}
-    >
-      <Stack
-        position="absolute"
-        top={-20}
-        right={-20}
-        width={120}
-        height={120}
-        borderRadius={60}
-        backgroundColor="rgba(255,255,255,0.10)"
-      />
-      <Stack
-        position="absolute"
-        bottom={-30}
-        right={40}
-        width={100}
-        height={100}
-        borderRadius={50}
-        backgroundColor="rgba(255,255,255,0.07)"
-      />
-
-      <Stack gap={8} style={{ zIndex: 1, maxWidth: "70%" }}>
-        {/* Code row */}
-        <Stack flexDirection="row" alignItems="center" gap={6} flexWrap="wrap">
-          <StyledText fontSize={12} color="rgba(255,255,255,0.85)">
-            Use code
-          </StyledText>
-          <StyledBadge
-            backgroundColor="#FFFFFF"
-            color={COLORS.primary}
-            paddingHorizontal={10}
-            paddingVertical={3}
-            borderRadius={999}
-            fontWeight="800"
-            fontSize={11}
-          >
-            FIRST50
-          </StyledBadge>
-          <StyledText fontSize={12} color="rgba(255,255,255,0.85)">
-            at checkout
-          </StyledText>
-        </Stack>
-
-        <StyledText
-          fontSize={20}
-          fontWeight="800"
-          color="#FFFFFF"
-          lineHeight={26}
-          style={{ letterSpacing: -0.3 }}
-        >
-          Get 50% Off{"\n"}Your First Order!
-        </StyledText>
-
-        <StyledPressable
-          backgroundColor="#1C1917"
-          borderRadius={999}
-          paddingHorizontal={16}
-          paddingVertical={8}
-          alignSelf="flex-start"
-        >
-          <StyledText fontSize={12} fontWeight="700" color="#FFFFFF">
-            Order Now
-          </StyledText>
-        </StyledPressable>
-      </Stack>
-    </Stack>
+    </ScalePressable>
   );
 }
 
@@ -420,6 +409,9 @@ export default function ResultsScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
   const cart = useCart();
+
+  const chipsAnim = useFadeUp(0);
+  const listAnim = useFadeUp(100);
 
   const {
     data: restaurants,
@@ -435,7 +427,7 @@ export default function ResultsScreen() {
     return (
       <StyledPage
         flex={1}
-        backgroundColor="#F8F8F8"
+        backgroundColor={COLORS.bg}
         alignItems="center"
         justifyContent="center"
         padding={24}
@@ -464,142 +456,125 @@ export default function ResultsScreen() {
   }
 
   return (
-    <StyledPage showStatusBar flex={1} backgroundColor={theme.colors.gray[1]}>
-      {/* ── Header: StyledHeader + StyledHeader.Full (per llm.md) ─────── */}
+    <StyledPage showStatusBar flex={1} backgroundColor={COLORS.bg}>
       <StyledPage.Header.Full>
-        <Stack
-          paddingHorizontal={H_PAD}
-          paddingTop={6}
-          paddingBottom={14}
-          gap={12}
-        >
-          {/* Row 1: location + bell */}
-          <Stack
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+        <Stack paddingHorizontal={H_PAD} paddingTop={8} gap={16}>
+          {/* Row 1: greeting + bell */}
+          <Stack horizontal alignItems="flex-start" justifyContent="space-between">
+            <StyledText fontSize={15} fontWeight="600" color={COLORS.textSecondary}>
+              {greeting()} 👋
+            </StyledText>
+            <StyledPressable
+              style={[
+                {
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                SHADOW_SOFT,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
+              <Icon name="bell" size={18} color={COLORS.textPrimary} />
+            </StyledPressable>
+          </Stack>
+
+          {/* Row 2: delivering to + location */}
+          <Stack gap={2}>
+            <StyledText
+              fontSize={10.5}
+              fontWeight="700"
+              color={COLORS.textMuted}
+              style={{ letterSpacing: 0.6, textTransform: "uppercase" }}
+            >
+              Delivering to
+            </StyledText>
             <StyledPressable
               onPress={() => setPickerOpen(true)}
               flexDirection="row"
               alignItems="center"
-              gap={5}
-              flex={1}
+              gap={6}
             >
-              <Icon
-                name={addressIconName(active.label) as any}
-                size={15}
-                color={COLORS.primary}
-              />
+              <Icon name={addressIconName(active.label) as any} size={14} color={COLORS.primary} />
               <StyledText
-                fontSize={15}
-                fontWeight="700"
+                fontSize={18}
+                fontWeight="800"
                 color={COLORS.textPrimary}
                 numberOfLines={1}
-                style={{ maxWidth: SCREEN_WIDTH - 100 }}
+                style={{ maxWidth: SCREEN_WIDTH - 130, letterSpacing: -0.3 }}
               >
                 {active.label ?? active.formattedAddress.split(",")[0]}
               </StyledText>
-              <Icon name="chevron-down" size={13} color={COLORS.primary} />
+              <Icon name="chevron-down" size={15} color={COLORS.primary} />
             </StyledPressable>
-
-            <Stack position="relative">
-              <Stack
-                width={40}
-                height={40}
-                borderRadius={20}
-                borderWidth={1}
-                borderColor={COLORS.border}
-                alignItems="center"
-                justifyContent="center"
-                backgroundColor="#FFFFFF"
-              >
-                <Icon name="bell" size={18} color={COLORS.textPrimary} />
-              </Stack>
-              <Stack
-                position="absolute"
-                top={2}
-                right={2}
-                width={8}
-                height={8}
-                borderRadius={4}
-                backgroundColor={COLORS.primary}
-                borderWidth={1.5}
-                borderColor="#FFFFFF"
-              />
-            </Stack>
           </Stack>
 
-          {/* Row 2: search + mic */}
-          <Stack
-            flexDirection="row"
-            alignItems="center"
-            gap={10}
-            borderWidth={1}
-            borderColor={COLORS.border}
-            borderRadius={999}
-            paddingHorizontal={16}
-            paddingVertical={11}
-            backgroundColor={COLORS.bgMuted}
-          >
-            <Icon name="search" size={15} color={COLORS.textMuted} />
-            <StyledText fontSize={13} color={COLORS.textMuted} flex={1}>
-              Search by restaurant or dish…
-            </StyledText>
+          {/* Row 3: search */}
+          <StyledPressable onPress={() => setPickerOpen(true)}>
             <Stack
-              width={32}
-              height={32}
-              borderRadius={16}
-              backgroundColor={COLORS.primaryLight}
+              horizontal
               alignItems="center"
-              justifyContent="center"
+              gap={10}
+              borderRadius={999}
+              paddingHorizontal={18}
+              paddingVertical={14}
+              backgroundColor="#FFFFFF"
+              style={SHADOW_SOFT}
             >
-              <Icon name="mic" size={14} color={COLORS.primary} />
+              <Icon name="search" size={16} color={COLORS.textMuted} />
+              <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
+                Search restaurants, cuisines...
+              </StyledText>
+              <Stack width={1} height={20} backgroundColor={COLORS.border} marginHorizontal={2} />
+              <Icon name="sliders" size={16} color={COLORS.textMuted} />
             </Stack>
-          </Stack>
+          </StyledPressable>
         </Stack>
       </StyledPage.Header.Full>
 
       {/* ── Body ──────────────────────────────────────────────────────── */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 20, paddingBottom: 8 }}>
         {/* Cuisine chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: H_PAD, paddingBottom: 4 }}
-        >
-          <CuisineChip
-            label="All"
-            emoji="🍽️"
-            active={cuisineFilter === null}
-            onPress={() => setCuisineFilter(null)}
-          />
-          {SUPPORTED_CUISINES.map((c) => (
+        <Animated.View style={chipsAnim}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: H_PAD }}
+          >
             <CuisineChip
-              key={c}
-              label={c}
-              emoji={cuisineEmoji(c)}
-              active={cuisineFilter === c}
-              onPress={() => setCuisineFilter(cuisineFilter === c ? null : c)}
+              label="All"
+              emoji="🍽️"
+              active={cuisineFilter === null}
+              onPress={() => setCuisineFilter(null)}
             />
-          ))}
-        </ScrollView>
+            {SUPPORTED_CUISINES.map((c) => (
+              <CuisineChip
+                key={c}
+                label={c}
+                emoji={cuisineEmoji(c)}
+                active={cuisineFilter === c}
+                onPress={() => setCuisineFilter(cuisineFilter === c ? null : c)}
+              />
+            ))}
+          </ScrollView>
+        </Animated.View>
 
         {/* Loading / error */}
         {isLoading && (
-          <Stack alignItems="center" paddingVertical={40}>
+          <Stack alignItems="center" paddingVertical={60}>
             <ActivityIndicator color={COLORS.primary} size="large" />
           </Stack>
         )}
         {error && (
           <Stack
             marginHorizontal={H_PAD}
-            marginTop={12}
-            padding={14}
-            borderRadius={12}
+            marginTop={20}
+            padding={16}
+            borderRadius={18}
             backgroundColor={COLORS.errorLight}
           >
             <StyledText fontSize={14} color={COLORS.error}>
@@ -608,101 +583,66 @@ export default function ResultsScreen() {
           </Stack>
         )}
 
-        {/* No coverage */}
+        {/* No coverage — elegant empty state */}
         {!isLoading && !error && (restaurants ?? []).length === 0 && (
-          <Stack
-            alignItems="center"
-            paddingVertical={40}
-            paddingHorizontal={32}
-            gap={10}
-          >
-            <Icon name="map-pin" size={32} color={COLORS.border} />
+          <Stack alignItems="center" paddingVertical={56} paddingHorizontal={36} gap={14}>
+            <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
+              <Icon name="map-pin" size={34} color={COLORS.primary} />
+            </StyledShape>
             <StyledText
-              fontSize={15}
-              fontWeight="700"
+              fontSize={17}
+              fontWeight="800"
               color={COLORS.textPrimary}
               textAlign="center"
             >
               No restaurants deliver here yet
             </StyledText>
-            <StyledText
-              fontSize={13}
-              color={COLORS.textMuted}
-              textAlign="center"
-            >
-              We don't have partners that cover this area. Try a nearby town or
-              city.
+            <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center" lineHeight={19}>
+              We don't have partners that cover this area. Try a nearby town or city.
             </StyledText>
-            <StyledPressable onPress={() => setPickerOpen(true)} marginTop={4}>
-              <StyledText fontSize={13} fontWeight="700" color={COLORS.primary}>
-                Try a different address →
-              </StyledText>
-            </StyledPressable>
+            <ScalePressable onPress={() => setPickerOpen(true)}>
+              <Stack
+                backgroundColor={COLORS.primary}
+                borderRadius={999}
+                paddingHorizontal={20}
+                paddingVertical={12}
+                marginTop={4}
+                style={SHADOW_CTA_CHIP}
+              >
+                <StyledText fontSize={13.5} fontWeight="700" color="#FFFFFF">
+                  Try a different address
+                </StyledText>
+              </Stack>
+            </ScalePressable>
           </Stack>
         )}
 
-        {/* Top picks — horizontal */}
+        {/* Restaurants nearby */}
         {!isLoading && !error && filtered.length > 0 && (
-          <Stack marginTop={20}>
-            <StyledSeperator
-              leftLabel="Top picks near you"
-              rightLabel="See all"
-              marginHorizontal={H_PAD}
-              marginBottom={14}
-              leftLabelProps={{
-                fontSize: 19,
-                fontWeight: "800",
-                color: COLORS.textPrimary,
-              }}
-              rightLabelProps={{
-                fontSize: 13,
-                fontWeight: "700",
-                color: COLORS.primary,
-              }}
-            />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: H_PAD,
-                paddingBottom: 4,
-              }}
-            >
+          <Animated.View style={listAnim}>
+            <Stack marginTop={28} paddingHorizontal={H_PAD}>
+              <Stack marginBottom={18} gap={2}>
+                <StyledText
+                  fontSize={21}
+                  fontWeight="800"
+                  color={COLORS.textPrimary}
+                  style={{ letterSpacing: -0.3 }}
+                >
+                  {cuisineFilter ? `${cuisineFilter} near you` : "🔥 Near You"}
+                </StyledText>
+                <StyledText fontSize={13} color={COLORS.textMuted}>
+                  {filtered.length} restaurant{filtered.length === 1 ? "" : "s"} available
+                </StyledText>
+              </Stack>
               {filtered.map((item) => (
-                <HorizontalCard
+                <RestaurantCard
                   key={item.id}
                   item={item}
                   onPress={() => router.push(`/restaurant/${item.id}`)}
                 />
               ))}
-            </ScrollView>
-          </Stack>
-        )}
-
-        {/* All restaurants — vertical */}
-        {!isLoading && !error && filtered.length > 0 && (
-          <Stack marginTop={24} paddingHorizontal={H_PAD}>
-            <StyledSeperator
-              leftLabel={
-                cuisineFilter ? `${cuisineFilter} near you` : "All restaurants"
-              }
-              rightLabel={`${filtered.length} places`}
-              marginBottom={14}
-              leftLabelProps={{
-                fontSize: 19,
-                fontWeight: "800",
-                color: COLORS.textPrimary,
-              }}
-              rightLabelProps={{ fontSize: 13, color: COLORS.textMuted }}
-            />
-            {filtered.map((item) => (
-              <RestaurantRow
-                key={item.id}
-                item={item}
-                onPress={() => router.push(`/restaurant/${item.id}`)}
-              />
-            ))}
-          </Stack>
+            </Stack>
+          </Animated.View>
         )}
 
         {/* Cuisine empty */}
@@ -711,20 +651,12 @@ export default function ResultsScreen() {
           cuisineFilter &&
           filtered.length === 0 &&
           (restaurants ?? []).length > 0 && (
-            <Stack alignItems="center" paddingVertical={32} gap={8}>
-              <StyledText
-                fontSize={14}
-                color={COLORS.textMuted}
-                textAlign="center"
-              >
+            <Stack alignItems="center" paddingVertical={40} gap={10}>
+              <StyledText fontSize={14} color={COLORS.textMuted} textAlign="center">
                 No {cuisineFilter} restaurants deliver here yet.
               </StyledText>
               <StyledPressable onPress={() => setCuisineFilter(null)}>
-                <StyledText
-                  fontSize={13}
-                  fontWeight="700"
-                  color={COLORS.primary}
-                >
+                <StyledText fontSize={13} fontWeight="700" color={COLORS.primary}>
                   Browse all cuisines
                 </StyledText>
               </StyledPressable>
@@ -734,7 +666,6 @@ export default function ResultsScreen() {
 
       {cart.itemCount > 0 && <BasketBar />}
       <BottomTabBar active="home" />
-
       <AddressPickerPopup
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}

@@ -82,8 +82,14 @@ export function AddressPickerPopup({
   const { reset: resetOnboarding } = useOnboarding();
   const { data: suggestions, isFetching: suggestionsLoading } = useAddressSuggestions(query);
 
+  // If there are no saved addresses, go straight to search — don't show
+  // an empty list with just an "Add new" button.
+  const hasAddresses = (addresses ?? []).length > 0;
+  const showSearch = addingNew || !hasAddresses;
+
   function handleClose() {
-    setAddingNew(initialMode === "search");
+    // Reset to list view if addresses exist, search view if not.
+    setAddingNew(initialMode === "search" || !hasAddresses);
     setQuery("");
     onClose();
   }
@@ -107,12 +113,12 @@ export function AddressPickerPopup({
     <Popup
       visible={visible}
       onClose={handleClose}
-      title={addingNew ? "Add delivery address" : "Choose delivery address"}
+      title={showSearch ? "Set delivery address" : "Choose delivery address"}
       showClose
       position="bottom"
       safeAreaBottom
     >
-      {!addingNew ? (
+      {!showSearch ? (
         <Stack padding={20} gap={2}>
           {(addresses ?? []).map((addr) => (
             <AddressRow key={addr.id} addr={addr} active={activeAddressId === addr.id} onSelect={handleSelectSavedAddress} />
@@ -164,8 +170,7 @@ export function AddressPickerPopup({
               </StyledPressable>
             )}
 
-            <Stack
-              horizontal
+            <Stack horizontal
               alignItems="center"
               gap={10}
               borderWidth={1}

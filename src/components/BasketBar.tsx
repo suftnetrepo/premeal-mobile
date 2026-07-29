@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { Animated } from "react-native";
 import { router } from "expo-router";
 import { Stack, StyledText, StyledPressable } from "fluent-styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,16 +10,37 @@ import { COLORS } from "../theme/colors";
 export function BasketBar() {
   const insets = useSafeAreaInsets();
   const { itemCount, subtotalCents } = useCart();
+  const anim = useRef(new Animated.Value(0)).current;
+
+  // Slides/fades in every time the bar mounts — it unmounts entirely at
+  // itemCount === 0 below, so this fires fresh each time the basket goes
+  // from empty to non-empty.
+  useEffect(() => {
+    Animated.spring(anim, {
+      toValue: 1,
+      friction: 8,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  }, [anim]);
 
   if (itemCount === 0) return null;
 
   return (
-    <Stack
-      position="absolute"
-      left={16}
-      right={16}
-      bottom={insets.bottom + 12}
-      zIndex={20}
+    <Animated.View
+      style={{
+        position: "absolute",
+        left: 16,
+        right: 16,
+        bottom: insets.bottom + 12,
+        zIndex: 20,
+        opacity: anim,
+        transform: [
+          {
+            translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [56, 0] }),
+          },
+        ],
+      }}
     >
       <StyledPressable
         onPress={() => router.push("/basket")}
@@ -57,6 +80,6 @@ export function BasketBar() {
           {formatMoney(subtotalCents)}
         </StyledText>
       </StyledPressable>
-    </Stack>
+    </Animated.View>
   );
 }
