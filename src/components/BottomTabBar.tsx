@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Animated, Easing } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
-import { Stack, StyledText, StyledPressable } from "fluent-styles";
+import { Stack, StyledPressable } from "fluent-styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type Tab = "home" | "order" | "search" | "addresses" | "account";
@@ -92,7 +92,7 @@ export function BottomTabBar({ active }: { active: Tab }) {
 
   function go(tab: Tab) {
     if (tab === "home")      router.replace("/results");
-    if (tab === "order")     router.replace("/results");
+    if (tab === "order")     router.push("/orders");
     if (tab === "search")    router.replace("/results");
     if (tab === "addresses") router.push("/addresses");
     if (tab === "account")   router.push("/account");

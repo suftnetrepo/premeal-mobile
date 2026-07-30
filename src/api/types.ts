@@ -119,7 +119,10 @@ export type Order = {
   restaurant: { id: string; name: string };
   slot: { date: string; windowStart: string; windowEnd: string };
   items: OrderItem[];
-  review: { rating: number; comment: string | null } | null;
+  // The API's `include: { review: true }` (see premeal-app's
+  // /api/orders/[id]) returns the full Review row, including createdAt —
+  // this was just under-declared here previously.
+  review: { rating: number; comment: string | null; createdAt: string } | null;
 };
 
 export type Address = {

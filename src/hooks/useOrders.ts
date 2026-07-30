@@ -56,3 +56,16 @@ export function useCancelOrder() {
     },
   });
 }
+
+export function useSubmitReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, ...input }: { orderId: string } & ordersApi.SubmitReviewInput) =>
+      ordersApi.submitReview(orderId, input),
+    onSuccess: (_data, { orderId }) => {
+      // Refetching order.review is what flips the detail screen from the
+      // review form to the read-only "already reviewed" state.
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+    },
+  });
+}

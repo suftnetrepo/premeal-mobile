@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Popup, Stack, StyledText, StyledPressable, StyledCheckBox } from "fluent-styles";
+import { Popup, Stack, StyledText, StyledPressable, StyledCheckBox, theme } from "fluent-styles";
 import type { MenuItem, ModifierGroup } from "../api/types";
 import { formatMoney } from "../lib/format";
 import { computeUnitPriceCents, invalidGroups } from "../cart/cart-utils";
 import { COLORS } from "../theme/colors";
+
 
 type Props = {
   visible: boolean;
@@ -106,6 +107,7 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
                         checked={checked}
                         onCheck={() => opt.isAvailable && toggleOption(group, opt.id)}
                         checkedColor={COLORS.primary}
+                        checkMarkColor={theme.colors.gray[1]}
                       />
                       <StyledText fontSize={14} color={COLORS.textPrimary} flex={1}>
                         {opt.name}

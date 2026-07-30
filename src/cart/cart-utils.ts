@@ -1,5 +1,11 @@
 import type { MenuItem, ModifierGroup } from "../api/types";
 
+// Flat delivery fee — mirrors DELIVERY_FEE_CENTS in premeal-app/src/lib/capacity.ts.
+// Mobile has no /subscriptions endpoint to check for a fee waiver, so this
+// is shown as an estimate on the basket and checkout screens; the order the
+// server actually creates is the source of truth for the final charge.
+export const ESTIMATED_DELIVERY_FEE_CENTS = 300;
+
 /** Base price + sum of selected options' deltas — one unit, before quantity. */
 export function computeUnitPriceCents(menuItem: MenuItem, selectedOptionIds: string[]): number {
   const allOptions = (menuItem.modifierGroups ?? []).flatMap((g) => g.options);

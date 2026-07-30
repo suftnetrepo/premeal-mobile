@@ -1,5 +1,11 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Animated, Dimensions, Easing, ScrollView } from "react-native";
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Easing,
+  ScrollView,
+} from "react-native";
 import { BlurView } from "expo-blur";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { router } from "expo-router";
@@ -10,6 +16,9 @@ import {
   StyledPressable,
   StyledShape,
   Stack,
+  theme,
+  StyledImage,
+  StyledImageBackground,
 } from "fluent-styles";
 import { useLocation } from "../../src/location/LocationContext";
 import { useRestaurants } from "../../src/hooks/useRestaurants";
@@ -86,12 +95,20 @@ function ScalePressable({
     }).start();
   }
   function pressOut() {
-    Animated.spring(anim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+    Animated.spring(anim, {
+      toValue: 1,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
   }
 
   return (
     <Animated.View style={[style, { transform: [{ scale: anim }] }]}>
-      <StyledPressable onPress={onPress} onPressIn={pressIn} onPressOut={pressOut}>
+      <StyledPressable
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+      >
         {children}
       </StyledPressable>
     </Animated.View>
@@ -113,7 +130,12 @@ function useFadeUp(delay = 0) {
   return {
     opacity: anim,
     transform: [
-      { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
+      {
+        translateY: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [14, 0],
+        }),
+      },
     ],
   };
 }
@@ -143,7 +165,10 @@ function FadeImage({ uri, height }: { uri: string; height: number }) {
           opacity: anim,
           transform: [
             {
-              scale: anim.interpolate({ inputRange: [0, 1], outputRange: [1.06, 1] }),
+              scale: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1.06, 1],
+              }),
             },
           ],
         }}
@@ -179,11 +204,23 @@ function CuisineChip({
         style={active ? SHADOW_CTA_CHIP : SHADOW_CHIP}
       >
         {active && (
-          <Svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+          <Svg
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          >
             <Defs>
               <LinearGradient id={`chip-${label}`} x1="0" y1="0" x2="1" y2="1">
                 <Stop offset="0" stopColor="#FB923C" stopOpacity={1} />
-                <Stop offset="1" stopColor={COLORS.primaryDark} stopOpacity={1} />
+                <Stop
+                  offset="1"
+                  stopColor={COLORS.primaryDark}
+                  stopOpacity={1}
+                />
               </LinearGradient>
             </Defs>
             <Rect width="100%" height="100%" fill={`url(#chip-${label})`} />
@@ -192,7 +229,9 @@ function CuisineChip({
         <StyledShape
           size={40}
           cycle
-          backgroundColor={active ? "rgba(255,255,255,0.22)" : COLORS.primaryLight}
+          backgroundColor={
+            active ? "rgba(255,255,255,0.22)" : COLORS.primaryLight
+          }
         >
           <StyledText fontSize={20}>{emoji}</StyledText>
         </StyledShape>
@@ -228,174 +267,179 @@ const CARD_IMAGES = [
 ];
 
 // ─── Restaurant card ────────────────────────────────────────────────────────
-function RestaurantCard({ item, onPress }: { item: Restaurant; onPress: () => void }) {
-  const [saved, setSaved] = useState(false);
-  const heartAnim = useRef(new Animated.Value(1)).current;
+function RestaurantCard({
+  item,
+  onPress,
+}: {
+  item: Restaurant;
+  onPress: () => void;
+}) {
   const image =
-    item.imageUrl ?? CARD_IMAGES[Math.abs(item.id.charCodeAt(0)) % CARD_IMAGES.length];
-
-  function toggleSaved() {
-    setSaved((s) => !s);
-    Animated.sequence([
-      Animated.timing(heartAnim, { toValue: 1.25, duration: 100, useNativeDriver: true }),
-      Animated.spring(heartAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
-    ]).start();
-  }
+    item.imageUrl ??
+    CARD_IMAGES[Math.abs(item.id.charCodeAt(0)) % CARD_IMAGES.length];
 
   return (
-    <ScalePressable
-      onPress={onPress}
-      toValue={0.98}
-      style={[
-        {
-          marginBottom: 24,
-          borderRadius: 30,
-          overflow: "hidden",
-          backgroundColor: COLORS.bgCard,
-        },
-        SHADOW_CARD,
-      ]}
-    >
-      {/* Photo — ~60% of card height */}
-      <Stack position="relative">
-        <FadeImage uri={image} height={210} />
-
-        {/* Legibility gradient so the "Slots open" chip reads on any photo */}
-        <Svg
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 90 }}
+    <ScalePressable onPress={onPress}>
+      <Stack
+        backgroundColor={theme.colors.white}
+        borderRadius={20}
+        borderWidth={1}
+        borderColor={theme.colors.gray[100]}
+        overflow="hidden"
+        position="relative"
+        flexDirection="column"
+        flex={1}
+        marginBottom={16}
+      >
+        <StyledImageBackground
+          source={{ uri: image }}
+          height={210}
+          resizeMode="cover"
         >
-          <Defs>
-            <LinearGradient id={`card-${item.id}`} x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#000000" stopOpacity={0} />
-              <Stop offset="1" stopColor="#000000" stopOpacity={0.35} />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill={`url(#card-${item.id})`} />
-        </Svg>
-
-        {/* Favourite — frosted glass */}
-        <Stack position="absolute" top={14} right={14} borderRadius={20} overflow="hidden" style={SHADOW_SOFT}>
-          <BlurView intensity={45} tint="light">
-            <StyledPressable
-              onPress={toggleSaved}
-              width={40}
-              height={40}
-              alignItems="center"
-              justifyContent="center"
-              accessibilityRole="button"
-              accessibilityLabel={saved ? "Remove from favourites" : "Add to favourites"}
-            >
-              <Animated.View style={{ transform: [{ scale: heartAnim }] }}>
-                <Icon
-                  name="heart"
-                  size={17}
-                  color={saved ? COLORS.primary : "#FFFFFF"}
-                  style={saved ? undefined : { opacity: 0.95 }}
-                />
-              </Animated.View>
-            </StyledPressable>
-          </BlurView>
-        </Stack>
-
-        {/* Slots badge */}
-        <Stack
-          position="absolute"
-          bottom={14}
-          left={14}
-          horizontal
-          alignItems="center"
-          gap={5}
-          backgroundColor="rgba(255,255,255,0.94)"
-          borderRadius={999}
-          paddingHorizontal={11}
-          paddingVertical={6}
-          flexWrap="nowrap"
-        >
-          <Icon name="clock" size={11} color={COLORS.textPrimary} />
-          <StyledText fontSize={11} fontWeight="700" color={COLORS.textPrimary}>
-            Slots open
-          </StyledText>
-        </Stack>
-      </Stack>
-
-      {/* Info */}
-      <Stack padding={18} gap={8}>
-        <StyledText
-          fontSize={19}
-          fontWeight="800"
-          color={COLORS.textPrimary}
-          numberOfLines={1}
-          style={{ letterSpacing: -0.3 }}
-        >
-          {item.name}
-        </StyledText>
-
-        <Stack horizontal alignItems="center" gap={6} flexWrap="wrap">
-          <StyledText fontSize={13} color={COLORS.textMuted}>
-            {item.cuisine}
-          </StyledText>
-          {item.distanceKm != null && (
-            <>
-              <StyledText fontSize={12} color={COLORS.border}>
-                ·
-              </StyledText>
-              <StyledText fontSize={13} color={COLORS.textMuted}>
-                {item.distanceKm < 1
-                  ? `${Math.round(item.distanceKm * 1000)} m`
-                  : `${item.distanceKm.toFixed(1)} km`}
-              </StyledText>
-            </>
-          )}
-          {item.averageRating !== null && (
-            <Stack horizontal alignItems="center" gap={3} marginLeft={2}>
-              <Icon name="star" size={12} color="#F59E0B" />
-              <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
-                {item.averageRating.toFixed(1)}
-              </StyledText>
-              <StyledText fontSize={12} color={COLORS.textMuted}>
-                ({item.reviewCount}+)
-              </StyledText>
-            </Stack>
-          )}
-        </Stack>
-
-        <Stack
-          horizontal
-          alignItems="center"
-          justifyContent="space-between"
-          marginTop={4}
-        >
-          {item.deliveryFeeCents === 0 ? (
-            <StyledText fontSize={13.5} fontWeight="700" color={COLORS.primary}>
-              Free delivery
-            </StyledText>
-          ) : (
-            <Stack horizontal alignItems="center" gap={5}>
-              <StyledText fontSize={13}>🚴</StyledText>
-              <StyledText fontSize={13} color={COLORS.textMuted}>
-                Delivery
-              </StyledText>
-              <StyledText fontSize={13.5} fontWeight="700" color={COLORS.primary}>
-                {formatMoney(item.deliveryFeeCents)}
-              </StyledText>
-            </Stack>
-          )}
-          <Stack
-            backgroundColor="#1C1917"
-            borderRadius={999}
-            paddingHorizontal={14}
-            paddingVertical={7}
+          <Svg
             style={{
-              shadowColor: "#1C1917",
-              shadowOffset: { width: 0, height: 3 },
-              shadowOpacity: 0.2,
-              shadowRadius: 6,
-              elevation: 2,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 90,
             }}
           >
-            <StyledText fontSize={12} fontWeight="700" color="#FFFFFF">
-              {item.minOrderCents === 0 ? "No min." : `Min ${formatMoney(item.minOrderCents)}`}
+            <Defs>
+              <LinearGradient
+                id={`card-${item.id}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <Stop offset="0" stopColor="#000000" stopOpacity={0} />
+                <Stop offset="1" stopColor="#000000" stopOpacity={0.35} />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill={`url(#card-${item.id})`} />
+          </Svg>
+
+          {/* Slots badge */}
+          <Stack
+            top={14}
+            right={14}
+            horizontal
+            gap={5}
+            backgroundColor="rgba(255,255,255,0.94)"
+            borderRadius={999}
+            paddingHorizontal={11}
+            paddingVertical={6}
+            flexDirection="row"
+            alignItems="center"
+            alignSelf="flex-end" 
+          >
+            <Icon name="clock" size={11} color={COLORS.textPrimary} />
+            <StyledText
+              fontSize={11}
+              fontWeight="700"
+              color={COLORS.textPrimary}
+            >
+              Slots open
             </StyledText>
+          </Stack>
+        </StyledImageBackground>
+
+        {/* Info */}
+        <Stack padding={18} gap={8}>
+          <Stack horizontal alignItems="center" justifyContent="space-between">
+            <StyledText
+              fontSize={19}
+              fontWeight="800"
+              color={COLORS.textPrimary}
+              numberOfLines={1}
+              style={{ letterSpacing: -0.3 }}
+            >
+              {item.name}
+            </StyledText>
+
+            {item.distanceKm != null && (
+              <>
+                <StyledText fontSize={12} color={COLORS.border}>
+                  ·
+                </StyledText>
+                <StyledText fontSize={13} color={COLORS.textMuted}>
+                  {`${item.distanceKm.toFixed(1)} km`}
+                </StyledText>
+              </>
+            )}
+          </Stack>
+
+          <Stack horizontal alignItems="center" gap={6} flexWrap="wrap">
+            <StyledText fontSize={13} color={COLORS.textMuted}>
+              {item.cuisine}
+            </StyledText>
+
+            {item.averageRating !== null && (
+              <Stack horizontal alignItems="center" gap={3} marginLeft={2}>
+                <Icon name="star" size={12} color="#F59E0B" />
+                <StyledText
+                  fontSize={13}
+                  fontWeight="700"
+                  color={COLORS.textPrimary}
+                >
+                  {item.averageRating.toFixed(1)}
+                </StyledText>
+                <StyledText fontSize={12} color={COLORS.textMuted}>
+                  ({item.reviewCount}+)
+                </StyledText>
+              </Stack>
+            )}
+          </Stack>
+
+          <Stack
+            horizontal
+            alignItems="center"
+            justifyContent="space-between"
+            marginTop={1}
+          >
+            {item.deliveryFeeCents === 0 ? (
+              <StyledText
+                fontSize={13.5}
+                fontWeight="700"
+                color={COLORS.primary}
+              >
+                Free delivery
+              </StyledText>
+            ) : (
+              <Stack horizontal alignItems="center" gap={5}>
+                <StyledText fontSize={13}>🚴</StyledText>
+                <StyledText fontSize={13} color={COLORS.textMuted}>
+                  Delivery
+                </StyledText>
+                <StyledText
+                  fontSize={13.5}
+                  fontWeight="700"
+                  color={COLORS.primary}
+                >
+                  {formatMoney(item.deliveryFeeCents)}
+                </StyledText>
+              </Stack>
+            )}
+            <Stack
+              backgroundColor="#1C1917"
+              borderRadius={999}
+              paddingHorizontal={14}
+              paddingVertical={7}
+              style={{
+                shadowColor: "#1C1917",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 6,
+                elevation: 2,
+              }}
+            >
+              <StyledText fontSize={12} fontWeight="700" color="#FFFFFF">
+                {item.minOrderCents === 0
+                  ? "No min."
+                  : `Min ${formatMoney(item.minOrderCents)}`}
+              </StyledText>
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
@@ -455,21 +499,78 @@ export default function ResultsScreen() {
     );
   }
 
+  const pillLabel = active?.label
+    ? `${active.label} · ${active.formattedAddress.split(",")[0]}`
+    : active?.formattedAddress
+      ? active.formattedAddress.split(",").slice(0, 2).join(",")
+      : status === "loading"
+        ? "Detecting location…"
+        : "Set your address";
+
   return (
     <StyledPage showStatusBar flex={1} backgroundColor={COLORS.bg}>
       <StyledPage.Header.Full>
         <Stack paddingHorizontal={H_PAD} paddingTop={8} gap={16}>
-          {/* Row 1: greeting + bell */}
-          <Stack horizontal alignItems="flex-start" justifyContent="space-between">
-            <StyledText fontSize={15} fontWeight="600" color={COLORS.textSecondary}>
-              {greeting()} 👋
-            </StyledText>
+          <Stack horizontal alignItems="center" justifyContent="space-between">
+            <Stack horizontal alignItems="center" gap={12} flex={1}>
+              <Stack
+                style={[
+                  { borderRadius: 24, backgroundColor: "#FFFFFF" },
+                  SHADOW_SOFT,
+                ]}
+              >
+                <StyledShape size={48} cycle backgroundColor="transparent">
+                  <Icon
+                    name="user"
+                    size={19}
+                    //  color={user ? COLORS.primary : COLORS.textMuted}
+                  />
+                </StyledShape>
+              </Stack>
+              <Stack gap={2} flex={1}>
+                <StyledText
+                  fontSize={10.5}
+                  fontWeight="300"
+                  paddingLeft={3}
+                  color={COLORS.textMuted}
+                  letterSpacing={0.6}
+                  textTransform="uppercase"
+                >
+                  Delivering to
+                </StyledText>
+                <StyledPressable
+                  onPress={() => setPickerOpen(true)}
+                  flexDirection="row"
+                  alignItems="center"
+                  gap={6}
+                >
+                  <Icon
+                    name={addressIconName(active.label) as any}
+                    size={14}
+                    color={COLORS.primary}
+                  />
+                  <StyledText
+                    fontSize={18}
+                    fontWeight="800"
+                    color={COLORS.textPrimary}
+                    numberOfLines={1}
+                    style={{
+                      maxWidth: SCREEN_WIDTH - 130,
+                      letterSpacing: -0.3,
+                    }}
+                  >
+                    {pillLabel}
+                  </StyledText>
+                  <Icon name="chevron-down" size={15} color={COLORS.primary} />
+                </StyledPressable>
+              </Stack>
+            </Stack>
             <StyledPressable
               style={[
                 {
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
                   backgroundColor: "#FFFFFF",
                   alignItems: "center",
                   justifyContent: "center",
@@ -479,41 +580,10 @@ export default function ResultsScreen() {
               accessibilityRole="button"
               accessibilityLabel="Notifications"
             >
-              <Icon name="bell" size={18} color={COLORS.textPrimary} />
+              <Icon name="bell" size={19} color={COLORS.textPrimary} />
             </StyledPressable>
           </Stack>
 
-          {/* Row 2: delivering to + location */}
-          <Stack gap={2}>
-            <StyledText
-              fontSize={10.5}
-              fontWeight="700"
-              color={COLORS.textMuted}
-              style={{ letterSpacing: 0.6, textTransform: "uppercase" }}
-            >
-              Delivering to
-            </StyledText>
-            <StyledPressable
-              onPress={() => setPickerOpen(true)}
-              flexDirection="row"
-              alignItems="center"
-              gap={6}
-            >
-              <Icon name={addressIconName(active.label) as any} size={14} color={COLORS.primary} />
-              <StyledText
-                fontSize={18}
-                fontWeight="800"
-                color={COLORS.textPrimary}
-                numberOfLines={1}
-                style={{ maxWidth: SCREEN_WIDTH - 130, letterSpacing: -0.3 }}
-              >
-                {active.label ?? active.formattedAddress.split(",")[0]}
-              </StyledText>
-              <Icon name="chevron-down" size={15} color={COLORS.primary} />
-            </StyledPressable>
-          </Stack>
-
-          {/* Row 3: search */}
           <StyledPressable onPress={() => setPickerOpen(true)}>
             <Stack
               horizontal
@@ -527,9 +597,14 @@ export default function ResultsScreen() {
             >
               <Icon name="search" size={16} color={COLORS.textMuted} />
               <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
-                Search restaurants, cuisines...
+                Search by address to see restaurants…
               </StyledText>
-              <Stack width={1} height={20} backgroundColor={COLORS.border} marginHorizontal={2} />
+              <Stack
+                width={1}
+                height={20}
+                backgroundColor={COLORS.border}
+                marginHorizontal={2}
+              />
               <Icon name="sliders" size={16} color={COLORS.textMuted} />
             </Stack>
           </StyledPressable>
@@ -537,7 +612,10 @@ export default function ResultsScreen() {
       </StyledPage.Header.Full>
 
       {/* ── Body ──────────────────────────────────────────────────────── */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 20, paddingBottom: 8 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: 8 }}
+      >
         {/* Cuisine chips */}
         <Animated.View style={chipsAnim}>
           <ScrollView
@@ -585,7 +663,12 @@ export default function ResultsScreen() {
 
         {/* No coverage — elegant empty state */}
         {!isLoading && !error && (restaurants ?? []).length === 0 && (
-          <Stack alignItems="center" paddingVertical={56} paddingHorizontal={36} gap={14}>
+          <Stack
+            alignItems="center"
+            paddingVertical={56}
+            paddingHorizontal={36}
+            gap={14}
+          >
             <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
               <Icon name="map-pin" size={34} color={COLORS.primary} />
             </StyledShape>
@@ -597,8 +680,14 @@ export default function ResultsScreen() {
             >
               No restaurants deliver here yet
             </StyledText>
-            <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center" lineHeight={19}>
-              We don't have partners that cover this area. Try a nearby town or city.
+            <StyledText
+              fontSize={13.5}
+              color={COLORS.textMuted}
+              textAlign="center"
+              lineHeight={19}
+            >
+              We don't have partners that cover this area. Try a nearby town or
+              city.
             </StyledText>
             <ScalePressable onPress={() => setPickerOpen(true)}>
               <Stack
@@ -621,7 +710,13 @@ export default function ResultsScreen() {
         {!isLoading && !error && filtered.length > 0 && (
           <Animated.View style={listAnim}>
             <Stack marginTop={28} paddingHorizontal={H_PAD}>
-              <Stack marginBottom={18} gap={2}>
+              <Stack
+                marginBottom={18}
+                gap={2}
+                justifyContent="space-between"
+                alignItems="center"
+                horizontal
+              >
                 <StyledText
                   fontSize={21}
                   fontWeight="800"
@@ -631,7 +726,7 @@ export default function ResultsScreen() {
                   {cuisineFilter ? `${cuisineFilter} near you` : "🔥 Near You"}
                 </StyledText>
                 <StyledText fontSize={13} color={COLORS.textMuted}>
-                  {filtered.length} restaurant{filtered.length === 1 ? "" : "s"} available
+                  {filtered.length} place{filtered.length === 1 ? "" : "s"}{" "}
                 </StyledText>
               </Stack>
               {filtered.map((item) => (
@@ -652,11 +747,19 @@ export default function ResultsScreen() {
           filtered.length === 0 &&
           (restaurants ?? []).length > 0 && (
             <Stack alignItems="center" paddingVertical={40} gap={10}>
-              <StyledText fontSize={14} color={COLORS.textMuted} textAlign="center">
+              <StyledText
+                fontSize={14}
+                color={COLORS.textMuted}
+                textAlign="center"
+              >
                 No {cuisineFilter} restaurants deliver here yet.
               </StyledText>
               <StyledPressable onPress={() => setCuisineFilter(null)}>
-                <StyledText fontSize={13} fontWeight="700" color={COLORS.primary}>
+                <StyledText
+                  fontSize={13}
+                  fontWeight="700"
+                  color={COLORS.primary}
+                >
                   Browse all cuisines
                 </StyledText>
               </StyledPressable>

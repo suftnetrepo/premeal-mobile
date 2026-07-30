@@ -1,49 +1,177 @@
-import { ActivityIndicator, FlatList } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Animated, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { StyledPage, Stack, StyledText, StyledPressable, StyledCard } from "fluent-styles";
+import { Feather as Icon } from "@expo/vector-icons";
+import { StyledPage, Stack, StyledText, StyledShape } from "fluent-styles";
 import { useMyOrders } from "../../../src/hooks/useOrders";
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { COLORS } from "../../../src/theme/colors";
-import type { OrderStatus } from "../../../src/api/types";
+import { STATUS_LABEL, STATUS_COLOR } from "../../../src/lib/order-status";
+import { ScalePressable, useFadeUp, SHADOW_SOFT, SHADOW_CARD, SHADOW_CTA } from "../../../src/lib/animations";
+import type { Order } from "../../../src/api/types";
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  PENDING_CONFIRMATION: "Awaiting confirmation",
-  PAYMENT_ACTION_REQUIRED: "Action needed",
-  CONFIRMED: "Confirmed",
-  DECLINED: "Declined",
-  EXPIRED: "Expired",
-  CANCELLED: "Cancelled",
-  PREPARING: "Preparing",
-  OUT_FOR_DELIVERY: "Out for delivery",
-  DELIVERED: "Delivered",
-};
+const H_PAD = 20;
 
-const STATUS_COLOR: Record<OrderStatus, string> = {
-  PENDING_CONFIRMATION: COLORS.warning,
-  PAYMENT_ACTION_REQUIRED: COLORS.error,
-  CONFIRMED: COLORS.success,
-  DECLINED: COLORS.error,
-  EXPIRED: COLORS.textMuted,
-  CANCELLED: COLORS.textMuted,
-  PREPARING: COLORS.primary,
-  OUT_FOR_DELIVERY: COLORS.primary,
-  DELIVERED: COLORS.success,
-};
+// Exact same filter set as premeal-app's /orders page (src/app/orders/page.tsx):
+// 6 chips, "Declined/expired" groups two statuses into one, and PREPARING /
+// PAYMENT_ACTION_REQUIRED / CANCELLED are deliberately not their own chip —
+// only reachable via "All". Keep in sync with the web version if it changes.
+type FilterValue = "ALL" | "PENDING_CONFIRMATION" | "CONFIRMED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "DECLINED";
+const FILTERS: { label: string; value: FilterValue }[] = [
+  { label: "All", value: "ALL" },
+  { label: "Awaiting confirmation", value: "PENDING_CONFIRMATION" },
+  { label: "Confirmed", value: "CONFIRMED" },
+  { label: "Out for delivery", value: "OUT_FOR_DELIVERY" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Declined/expired", value: "DECLINED" },
+];
+
+function matchesFilter(order: Order, filter: FilterValue): boolean {
+  if (filter === "ALL") return true;
+  if (filter === "DECLINED") return order.status === "DECLINED" || order.status === "EXPIRED";
+  return order.status === filter;
+}
+
+// ─── Filter chips — horizontally scrollable, active = dark pill (same
+// active-state language as the bottom tab bar). ────────────────────────────────
+function FilterChips({ value, onChange }: { value: FilterValue; onChange: (v: FilterValue) => void }) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+      {FILTERS.map((f) => {
+        const active = value === f.value;
+        return (
+          <ScalePressable key={f.value} onPress={() => onChange(f.value)} toValue={0.95}>
+            <Stack
+              paddingHorizontal={16}
+              paddingVertical={10}
+              borderRadius={999}
+              backgroundColor={active ? "#1C1917" : "#FFFFFF"}
+              style={SHADOW_SOFT}
+            >
+              <StyledText fontSize={13} fontWeight="700" color={active ? "#FFFFFF" : COLORS.textSecondary}>
+                {f.label}
+              </StyledText>
+            </Stack>
+          </ScalePressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+// ─── Order card ─────────────────────────────────────────────────────────────────
+function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
+  const statusColor = STATUS_COLOR[order.status];
+  const itemCount = order.items.reduce((sum, i) => sum + i.quantity, 0);
+
+  return (
+    <ScalePressable onPress={onPress} toValue={0.98} style={{ marginBottom: 18 }}>
+      <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={SHADOW_CARD}>
+        <Stack horizontal alignItems="center" gap={14}>
+          <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>
+            <Icon name="shopping-bag" size={21} color={COLORS.primary} />
+          </StyledShape>
+          <Stack flex={1} gap={4}>
+            <StyledText fontSize={16.5} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.2 }}>
+              {order.restaurant.name}
+            </StyledText>
+            <Stack horizontal alignItems="center" gap={6}>
+              <Icon name="clock" size={12} color={COLORS.textMuted} />
+              <StyledText fontSize={12.5} color={COLORS.textMuted}>
+                {formatDate(order.slot.date)} · {order.slot.windowStart}–{order.slot.windowEnd}
+              </StyledText>
+            </Stack>
+          </Stack>
+          <Stack backgroundColor={`${statusColor}18`} borderRadius={999} paddingHorizontal={12} paddingVertical={6}>
+            <StyledText fontSize={11.5} fontWeight="700" color={statusColor}>
+              {STATUS_LABEL[order.status]}
+            </StyledText>
+          </Stack>
+        </Stack>
+
+        <Stack height={1} backgroundColor={COLORS.border} />
+
+        <Stack horizontal alignItems="center" gap={12}>
+          <Stack horizontal alignItems="center" gap={10} flex={1}>
+            <StyledShape size={34} cycle backgroundColor={COLORS.primaryLight}>
+              <Icon name="shopping-bag" size={14} color={COLORS.primary} />
+            </StyledShape>
+            <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+              {itemCount} item{itemCount === 1 ? "" : "s"}
+            </StyledText>
+          </Stack>
+          <Stack width={1} height={28} backgroundColor={COLORS.border} />
+          <Stack horizontal alignItems="center" gap={10} flex={1.4}>
+            <StyledShape size={34} cycle backgroundColor={COLORS.primaryLight}>
+              <Icon name="map-pin" size={14} color={COLORS.primary} />
+            </StyledShape>
+            <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary} numberOfLines={1} style={{ flexShrink: 1 }}>
+              {order.deliveryAddress}
+            </StyledText>
+          </Stack>
+        </Stack>
+
+        <Stack horizontal alignItems="center" justifyContent="space-between" marginTop={2}>
+          <StyledText fontSize={19} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
+            {formatMoney(order.totalCents)}
+          </StyledText>
+          <Stack horizontal alignItems="center" gap={5}>
+            <StyledText fontSize={14} fontWeight="700" color={COLORS.primary}>
+              View order
+            </StyledText>
+            <Icon name="arrow-right" size={15} color={COLORS.primary} />
+          </Stack>
+        </Stack>
+      </Stack>
+    </ScalePressable>
+  );
+}
+
+// A distinct component (not inline conditional JSX) so its mount-fade hook
+// is called unconditionally within its own render — and remounting it via
+// `key={filter}` at the call site gives every filter switch a fresh, subtle
+// fade-in instead of an abrupt swap.
+function OrderList({ orders }: { orders: Order[] }) {
+  const anim = useFadeUp(0);
+  return (
+    <Animated.View style={anim}>
+      {orders.map((order) => (
+        <OrderCard key={order.id} order={order} onPress={() => router.push(`/orders/${order.id}`)} />
+      ))}
+    </Animated.View>
+  );
+}
 
 export default function OrdersScreen() {
   const { data: orders, isLoading, error } = useMyOrders();
+  const [filter, setFilter] = useState<FilterValue>("ALL");
+
+  const filtered = (orders ?? []).filter((o) => matchesFilter(o, filter));
 
   return (
     <StyledPage flex={1} backgroundColor={COLORS.bg} showStatusBar statusBarProps={{ barStyle: "dark-content" }}>
-      <StyledPage.Header
-        title="My orders"
-        titleAlignment="center"
-        showBackArrow
-        onBackPress={() => router.back()}
-        backgroundColor={COLORS.bgCard}
-        borderBottomWidth={0.5}
-        borderBottomColor={COLORS.border}
-      />
+      <StyledPage.Header.Full>
+        <Stack horizontal alignItems="center" justifyContent="space-between" paddingHorizontal={H_PAD} paddingTop={8} paddingBottom={4}>
+          <ScalePressable onPress={() => router.back()} toValue={0.88}>
+            <Stack width={40} height={40} borderRadius={20} alignItems="center" justifyContent="center" backgroundColor="#FFFFFF" style={SHADOW_SOFT}>
+              <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
+            </Stack>
+          </ScalePressable>
+          <Stack flex={1} alignItems="center" gap={2} paddingHorizontal={8}>
+            <StyledText fontSize={20} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
+              My orders
+            </StyledText>
+            <StyledText fontSize={12.5} color={COLORS.textMuted}>
+              Your past orders
+            </StyledText>
+          </Stack>
+          <ScalePressable onPress={() => router.push("/account")} toValue={0.88}>
+            <Stack width={40} height={40} borderRadius={20} alignItems="center" justifyContent="center" backgroundColor="#FFFFFF" style={SHADOW_SOFT}>
+              <Icon name="settings" size={18} color={COLORS.primary} />
+            </Stack>
+          </ScalePressable>
+        </Stack>
+      </StyledPage.Header.Full>
 
       {isLoading && (
         <Stack flex={1} alignItems="center" justifyContent="center">
@@ -53,53 +181,57 @@ export default function OrdersScreen() {
 
       {error && (
         <Stack flex={1} alignItems="center" justifyContent="center" padding={24}>
-          <StyledText fontSize={14} color={COLORS.error} textAlign="center">Could not load your orders.</StyledText>
+          <StyledText fontSize={14} color={COLORS.error} textAlign="center">
+            Could not load your orders.
+          </StyledText>
         </Stack>
       )}
 
       {!isLoading && !error && (
-        <FlatList
-          data={orders}
-          keyExtractor={(o) => o.id}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          renderItem={({ item }) => (
-            <StyledPressable onPress={() => router.push(`/orders/${item.id}`)}>
-              <StyledCard shadow="light" borderRadius={16} backgroundColor={COLORS.bgCard} borderWidth={0.5} borderColor={COLORS.border} overflow="hidden">
-                <Stack padding={16} gap={8}>
-                  <Stack horizontal justifyContent="space-between" alignItems="flex-start">
-                    <StyledText fontSize={15} fontWeight="700" color={COLORS.textPrimary} flex={1}>
-                      {item.restaurant.name}
-                    </StyledText>
-                    <Stack paddingHorizontal={10} paddingVertical={4} borderRadius={999} backgroundColor={`${STATUS_COLOR[item.status]}18`} marginLeft={10}>
-                      <StyledText fontSize={11} fontWeight="700" color={STATUS_COLOR[item.status]}>
-                        {STATUS_LABEL[item.status]}
-                      </StyledText>
-                    </Stack>
-                  </Stack>
-                  <StyledText fontSize={13} color={COLORS.textMuted}>
-                    🕐 {formatDate(item.slot.date)} · {item.slot.windowStart}–{item.slot.windowEnd}
-                  </StyledText>
-                  <Stack horizontal justifyContent="space-between" alignItems="center">
-                    <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
-                      {formatMoney(item.totalCents)}
-                    </StyledText>
-                    <StyledText fontSize={12} color={COLORS.primary} fontWeight="600">View →</StyledText>
-                  </Stack>
-                </Stack>
-              </StyledCard>
-            </StyledPressable>
-          )}
-          ListEmptyComponent={
-            <Stack alignItems="center" paddingTop={80} gap={8}>
-              <StyledText fontSize={40}>📋</StyledText>
-              <StyledText fontSize={16} fontWeight="700" color={COLORS.textPrimary}>No orders yet</StyledText>
-              <StyledText fontSize={14} color={COLORS.textMuted} textAlign="center">Your order history will appear here.</StyledText>
-              <StyledPressable onPress={() => router.replace("/")} marginTop={12} paddingHorizontal={24} paddingVertical={12} borderRadius={999} backgroundColor={COLORS.primary}>
-                <StyledText fontSize={14} fontWeight="700" color={COLORS.white}>Browse restaurants</StyledText>
-              </StyledPressable>
+        <ScrollView contentContainerStyle={{ padding: H_PAD, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+          {(orders ?? []).length > 0 && (
+            <Stack marginBottom={20}>
+              <FilterChips value={filter} onChange={setFilter} />
             </Stack>
-          }
-        />
+          )}
+
+          {(orders ?? []).length === 0 ? (
+            <Stack alignItems="center" paddingTop={60} paddingHorizontal={24} gap={14}>
+              <StyledShape size={92} cycle backgroundColor={COLORS.primaryLight}>
+                <Icon name="shopping-bag" size={36} color={COLORS.primary} />
+              </StyledShape>
+              <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
+                No orders yet
+              </StyledText>
+              <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+                Start exploring restaurants and place your first order.
+              </StyledText>
+              <ScalePressable onPress={() => router.replace("/")} toValue={0.96}>
+                <Stack
+                  backgroundColor={COLORS.primary}
+                  borderRadius={999}
+                  paddingHorizontal={24}
+                  paddingVertical={14}
+                  marginTop={4}
+                  style={SHADOW_CTA}
+                >
+                  <StyledText fontSize={14.5} fontWeight="700" color={COLORS.white}>
+                    Browse restaurants
+                  </StyledText>
+                </Stack>
+              </ScalePressable>
+            </Stack>
+          ) : filtered.length === 0 ? (
+            <Stack alignItems="center" paddingTop={48} gap={8}>
+              <Icon name="inbox" size={28} color={COLORS.border} />
+              <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+                No orders match this filter.
+              </StyledText>
+            </Stack>
+          ) : (
+            <OrderList key={filter} orders={filtered} />
+          )}
+        </ScrollView>
       )}
     </StyledPage>
   );

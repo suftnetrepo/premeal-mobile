@@ -150,7 +150,11 @@ function ScalePressable({
     }).start();
   }
   function pressOut() {
-    Animated.spring(anim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+    Animated.spring(anim, {
+      toValue: 1,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
   }
 
   return (
@@ -268,9 +272,11 @@ export default function DiscoverScreen() {
               <Stack gap={2} flex={1}>
                 <StyledText
                   fontSize={10.5}
-                  fontWeight="700"
+                  fontWeight="300"
+                  paddingLeft={3}
                   color={COLORS.textMuted}
-                  style={{ letterSpacing: 0.6, textTransform: "uppercase" }}
+                  letterSpacing={0.6}
+                  textTransform="uppercase"
                 >
                   Delivering to
                 </StyledText>
@@ -294,7 +300,10 @@ export default function DiscoverScreen() {
                     fontWeight="800"
                     color={COLORS.textPrimary}
                     numberOfLines={1}
-                    style={{ maxWidth: SCREEN_WIDTH - 190, letterSpacing: -0.2 }}
+                    style={{
+                      maxWidth: SCREEN_WIDTH - 190,
+                      letterSpacing: -0.2,
+                    }}
                   >
                     {pillLabel}
                   </StyledText>
@@ -386,7 +395,9 @@ export default function DiscoverScreen() {
                     <StyledImageBackground
                       source={{ uri: slide.image }}
                       flex={1}
+                      height={250}
                       justifyContent="flex-end"
+                      paddingTop={14}
                     >
                       <Svg
                         style={{
@@ -398,11 +409,33 @@ export default function DiscoverScreen() {
                         }}
                       >
                         <Defs>
-                          <LinearGradient id="hero" x1="0" y1="0" x2="1" y2="0.15">
-                            <Stop offset="0" stopColor="#0C0A09" stopOpacity={0.96} />
-                            <Stop offset="0.5" stopColor="#0C0A09" stopOpacity={0.82} />
-                            <Stop offset="0.78" stopColor="#0C0A09" stopOpacity={0.28} />
-                            <Stop offset="1" stopColor="#0C0A09" stopOpacity={0} />
+                          <LinearGradient
+                            id="hero"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="0.15"
+                          >
+                            <Stop
+                              offset="0"
+                              stopColor="#0C0A09"
+                              stopOpacity={0.96}
+                            />
+                            <Stop
+                              offset="0.5"
+                              stopColor="#0C0A09"
+                              stopOpacity={0.82}
+                            />
+                            <Stop
+                              offset="0.78"
+                              stopColor="#0C0A09"
+                              stopOpacity={0.28}
+                            />
+                            <Stop
+                              offset="1"
+                              stopColor="#0C0A09"
+                              stopOpacity={0}
+                            />
                           </LinearGradient>
                         </Defs>
                         <Rect width="100%" height="100%" fill="url(#hero)" />
@@ -415,7 +448,11 @@ export default function DiscoverScreen() {
                           paddingVertical={5}
                           alignSelf="flex-start"
                         >
-                          <StyledText fontSize={11} fontWeight="700" color="#FFFFFF">
+                          <StyledText
+                            fontSize={11}
+                            fontWeight="700"
+                            color="#FFFFFF"
+                          >
                             {slide.pill}
                           </StyledText>
                         </Stack>
@@ -425,14 +462,25 @@ export default function DiscoverScreen() {
                           lineHeight={28}
                           style={{ letterSpacing: -0.4 }}
                         >
-                          <StyledText fontSize={23} fontWeight="800" color="#FFFFFF">
+                          <StyledText
+                            fontSize={23}
+                            fontWeight="800"
+                            color="#FFFFFF"
+                          >
                             {slide.titleLead}
                           </StyledText>
-                          <StyledText fontSize={23} fontWeight="800" color={COLORS.primary}>
+                          <StyledText
+                            fontSize={23}
+                            fontWeight="800"
+                            color={COLORS.primary}
+                          >
                             {slide.titleHighlight}
                           </StyledText>
                         </StyledText>
-                        <StyledText fontSize={13} color="rgba(255,255,255,0.82)">
+                        <StyledText
+                          fontSize={13}
+                          color="rgba(255,255,255,0.82)"
+                        >
                           {slide.subtitle}
                         </StyledText>
                         <Stack
@@ -447,7 +495,11 @@ export default function DiscoverScreen() {
                           marginTop={6}
                           style={SHADOW_CTA}
                         >
-                          <StyledText fontSize={13.5} fontWeight="700" color="#FFFFFF">
+                          <StyledText
+                            fontSize={13.5}
+                            fontWeight="700"
+                            color="#FFFFFF"
+                          >
                             {slide.cta}
                           </StyledText>
                           <Icon name="arrow-right" size={14} color="#FFFFFF" />
@@ -474,7 +526,9 @@ export default function DiscoverScreen() {
                 width={i === slideIndex ? 22 : 6}
                 height={6}
                 borderRadius={3}
-                backgroundColor={i === slideIndex ? COLORS.primary : COLORS.border}
+                backgroundColor={
+                  i === slideIndex ? COLORS.primary : COLORS.border
+                }
               />
             ))}
           </Stack>
@@ -490,7 +544,7 @@ export default function DiscoverScreen() {
               marginBottom={16}
               style={{ letterSpacing: -0.3 }}
             >
-              ✨ Why Pre-Meal
+              ✨ Pre-Meal
             </StyledText>
             <Stack horizontal flexWrap="wrap" gap={14}>
               {VALUE_PROPS.map((v) => (
@@ -508,10 +562,14 @@ export default function DiscoverScreen() {
                     cycle
                     backgroundColor={COLORS.primaryLight}
                   >
-                    <Icon name={v.icon as any} size={22} color={COLORS.primary} />
+                    <Icon
+                      name={v.icon as any}
+                      size={22}
+                      color={COLORS.primary}
+                    />
                   </StyledShape>
                   <StyledText
-                    fontSize={14.5}
+                    fontSize={14}
                     fontWeight="800"
                     color={COLORS.textPrimary}
                     style={{ letterSpacing: -0.1 }}
