@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Animated, ScrollView } from "react-native";
+import { Animated, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import {
@@ -11,6 +11,8 @@ import {
   StyledTextInput,
   actionSheetService,
   type StyledTextInputHandle,
+  Loader,
+  Spinner,
 } from "fluent-styles";
 import {
   useAddresses,
@@ -222,7 +224,11 @@ export default function AddressesScreen() {
         </Stack>
       </StyledPage.Header.Full>
 
-      <ScrollView contentContainerStyle={{ padding: H_PAD, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ padding: H_PAD, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <StyledTextInput
           ref={searchRef}
           variant="outline"
@@ -239,7 +245,7 @@ export default function AddressesScreen() {
           <Stack marginTop={12}>
             {suggestionsLoading && (
               <Stack paddingVertical={16} alignItems="center">
-                <ActivityIndicator color={COLORS.primary} />
+                <Spinner size={22} color={COLORS.primary} />
               </Stack>
             )}
 
@@ -261,7 +267,7 @@ export default function AddressesScreen() {
 
         {isLoading ? (
           <Stack alignItems="center" paddingTop={60}>
-            <ActivityIndicator color={COLORS.primary} size="large" />
+            <Loader variant="spinner" color={COLORS.primary} />
           </Stack>
         ) : (
           <Animated.View style={listAnim}>
@@ -314,7 +320,7 @@ export default function AddressesScreen() {
             style={query.trim() ? SHADOW_CTA : undefined}
           >
             {createAddress.isPending ? (
-              <ActivityIndicator color={COLORS.white} />
+              <Spinner size={18} color={COLORS.white} />
             ) : (
               <Stack horizontal alignItems="center" gap={8}>
                 <Icon name="plus" size={17} color={query.trim() ? COLORS.white : COLORS.textMuted} />

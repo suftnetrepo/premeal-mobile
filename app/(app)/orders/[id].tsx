@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Animated, Linking, ScrollView, StyleSheet } from "react-native";
+import { Animated, Image, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
+import { useStripe } from "@stripe/stripe-react-native";
 import { Feather as Icon, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import {
@@ -12,14 +13,19 @@ import {
   StyledPressable,
   dialogueService,
   toastService,
+  Loader,
+  Spinner,
+  StyledImage,
 } from "fluent-styles";
 import { useOrder, useCancelOrder, useSubmitReview } from "../../../src/hooks/useOrders";
 import { useRestaurant } from "../../../src/hooks/useRestaurants";
+import { getPaymentActionSecret, completePaymentAction } from "../../../src/api/orders";
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { apiErrorMessage } from "../../../src/api/client";
 import { COLORS } from "../../../src/theme/colors";
 import { STATUS_LABEL, STATUS_COLOR } from "../../../src/lib/order-status";
 import { ScalePressable, useFadeUp, SHADOW_SOFT, SHADOW_CARD, SHADOW_CTA } from "../../../src/lib/animations";
+import { callPhoneNumber } from "../../../src/lib/phone";
 import type { Order, OrderStatus } from "../../../src/api/types";
 
 const QUICK_CHIPS = ["Delicious 😋", "Fast Delivery 🚀", "Fresh Food 🥗", "Great Portions 🍽️", "Friendly Service 😊", "Would Order Again ❤️"];
@@ -80,6 +86,105 @@ const ASSURANCE_ITEMS = [
 function StatusIcon({ icon, iconSet, size, color }: { icon: string; iconSet?: "feather" | "mci"; size: number; color: string }) {
   if (iconSet === "mci") return <MaterialCommunityIcons name={icon as any} size={size} color={color} />;
   return <Icon name={icon as any} size={size} color={color} />;
+}
+
+// ─── Payment action — 3D Secure. Direct port of premeal-app's
+// payment-action-verify.tsx: fetch the existing PaymentIntent's client
+// secret (no card re-entry — the payment method is already attached from
+// checkout), let Stripe mount whatever challenge the card issuer wants,
+// then ask the backend to authoritatively re-verify and finalize the
+// order. Only rendered while order.status === "PAYMENT_ACTION_REQUIRED". ──
+function PaymentActionCard({ orderId, onDone }: { orderId: string; onDone: () => void }) {
+  const { confirmPayment } = useStripe();
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleVerify() {
+    setVerifying(true);
+    setError(null);
+
+    let clientSecret: string;
+    try {
+      clientSecret = await getPaymentActionSecret(orderId);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+      setVerifying(false);
+      return;
+    }
+
+    // No card re-entry needed — the PaymentIntent already has the payment
+    // method attached from the original checkout attempt. This just
+    // completes whatever the card issuer wants (a 3D Secure challenge),
+    // handled entirely by the Stripe SDK.
+    const { error: stripeError } = await confirmPayment(clientSecret);
+    if (stripeError) {
+      setError(stripeError.message ?? "Verification failed.");
+      setVerifying(false);
+      return;
+    }
+
+    let result: { status: "succeeded" | "failed" | "still_requires_action" };
+    try {
+      result = await completePaymentAction(orderId);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+      setVerifying(false);
+      return;
+    }
+
+    if (result.status === "still_requires_action") {
+      setError("Verification wasn't completed — try again.");
+      setVerifying(false);
+      return;
+    }
+
+    // "succeeded" or "failed" both change the order's status server-side —
+    // refetch and let the rest of the screen show whatever the new state
+    // is. Deliberately not resetting `verifying` here: this card is about
+    // to unmount once the refetched order's status is no longer
+    // PAYMENT_ACTION_REQUIRED, same as web's version.
+    onDone();
+  }
+
+  return (
+    <Stack backgroundColor={COLORS.warningLight} borderRadius={28} padding={20} gap={12} style={SHADOW_CARD}>
+      <Stack horizontal alignItems="center" gap={14}>
+        <StyledShape size={52} cycle backgroundColor="#FFFFFF">
+          <Icon name="shield" size={22} color={COLORS.warning} />
+        </StyledShape>
+        <Stack flex={1} gap={3}>
+          <StyledText fontSize={16} fontWeight="800" color={COLORS.warning} style={{ letterSpacing: -0.2 }}>
+            Your bank needs you to verify this payment
+          </StyledText>
+        </Stack>
+      </Stack>
+
+      <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
+        The restaurant has accepted your order — we just need you to confirm the charge with your bank
+        before it's fully placed.
+      </StyledText>
+
+      {error && (
+        <StyledText fontSize={12.5} color={COLORS.error} lineHeight={18}>
+          {error}
+        </StyledText>
+      )}
+
+      <ScalePressable onPress={handleVerify} disabled={verifying} toValue={0.97}>
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          paddingVertical={15}
+          borderRadius={999}
+          backgroundColor={COLORS.warning}
+        >
+          <StyledText fontSize={14.5} fontWeight="700" color="#FFFFFF">
+            {verifying ? "Verifying…" : "Verify payment"}
+          </StyledText>
+        </Stack>
+      </ScalePressable>
+    </Stack>
+  );
 }
 
 // ─── Star — filled/outline, with a small bounce when tapped ───────────────────
@@ -286,7 +391,7 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
             </Svg>
           )}
           {submitReview.isPending ? (
-            <ActivityIndicator color={rating > 0 ? "#FFFFFF" : COLORS.textMuted} />
+            <Spinner size={18} color={rating > 0 ? "#FFFFFF" : COLORS.textMuted} />
           ) : (
             <StyledText fontSize={15.5} fontWeight="700" color={rating > 0 ? "#FFFFFF" : COLORS.textMuted}>
               Submit Review
@@ -300,7 +405,7 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: order, isLoading, error } = useOrder(id);
+  const { data: order, isLoading, error, refetch } = useOrder(id);
   const { data: restaurant } = useRestaurant(order?.restaurant.id);
   const cancelOrder = useCancelOrder();
 
@@ -325,9 +430,11 @@ export default function OrderDetailScreen() {
     }
   }
 
-  function handleCall() {
-    if (!restaurant?.phone) return;
-    Linking.openURL(`tel:${restaurant.phone}`);
+  async function handleCall() {
+    const result = await callPhoneNumber(restaurant?.phone);
+    if (!result.ok) {
+      toastService.error(result.message);
+    }
   }
 
   if (isLoading) {
@@ -335,7 +442,7 @@ export default function OrderDetailScreen() {
       <StyledPage flex={1} backgroundColor={COLORS.bg} showStatusBar statusBarProps={{ barStyle: "dark-content" }}>
         <OrderHeader title="Order" subtitle={null} onCall={null} />
         <Stack flex={1} alignItems="center" justifyContent="center">
-          <ActivityIndicator color={COLORS.primary} size="large" />
+          <Loader variant="spinner" color={COLORS.primary} />
         </Stack>
       </StyledPage>
     );
@@ -411,6 +518,11 @@ export default function OrderDetailScreen() {
 
           <Animated.View style={cardsAnim}>
             <Stack gap={16}>
+              {/* ── Payment action — 3D Secure verification ─────────────── */}
+              {order.status === "PAYMENT_ACTION_REQUIRED" && (
+                <PaymentActionCard orderId={order.id} onDone={() => refetch()} />
+              )}
+
               {/* ── Order items ───────────────────────────────────────── */}
               <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} style={SHADOW_CARD}>
                 <StyledText
@@ -426,10 +538,29 @@ export default function OrderDetailScreen() {
                   {order.items.map((item, i) => (
                     <Stack key={item.id}>
                       {i > 0 && <Stack height={1} backgroundColor={COLORS.border} marginBottom={16} />}
-                      <Stack horizontal alignItems="center" gap={14}>
-                        <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>
-                          <StyledText fontSize={20}>🍽️</StyledText>
-                        </StyledShape>
+                      <Stack horizontal alignItems="flex-start" gap={16}>
+                        {item.menuItem.imageUrl ? (
+                          <Stack
+                          width={52}
+                          height={52}
+                          borderRadius={16}
+                          overflow="hidden"
+                          flexShrink={0}
+                          >
+                            <StyledImage
+                              source={{ uri: item.menuItem.imageUrl }}
+                              width={52}
+                              height={52}
+                              resizeMode="cover"
+                            />
+                          </Stack>
+                        ) : (
+                          <Stack flexShrink={0}>
+                            <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>
+                              <StyledText fontSize={20}>🍽️</StyledText>
+                            </StyledShape>
+                          </Stack>
+                        )}
                         <Stack flex={1} gap={2}>
                           <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
                             {item.quantity}× {item.nameSnapshot}
@@ -440,7 +571,7 @@ export default function OrderDetailScreen() {
                             </StyledText>
                           )}
                         </Stack>
-                        <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
+                        <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flexShrink: 0 }}>
                           {formatMoney(item.priceCents * item.quantity)}
                         </StyledText>
                       </Stack>
@@ -545,7 +676,7 @@ export default function OrderDetailScreen() {
                     backgroundColor="#FFFFFF"
                   >
                     {cancelOrder.isPending ? (
-                      <ActivityIndicator color={COLORS.error} />
+                      <Spinner size={18} color={COLORS.error} />
                     ) : (
                       <Stack horizontal alignItems="center" gap={8}>
                         <Icon name="trash-2" size={16} color={COLORS.error} />

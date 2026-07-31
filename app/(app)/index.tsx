@@ -238,7 +238,7 @@ export default function DiscoverScreen() {
   // of the way.
   function handleLocationSelected(loc: ActiveLocation) {
     setActive(loc);
-    router.push("/results");
+    router.replace("/results");
   }
 
   const pillLabel = active?.label

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { TextInput, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { StyledPage, Stack, StyledText, StyledPressable } from "fluent-styles";
+import { StyledPage, Stack, StyledText, StyledPressable, Spinner } from "fluent-styles";
 import { useAuth } from "../../src/auth/AuthContext";
 import { apiErrorMessage } from "../../src/api/client";
 import { COLORS } from "../../src/theme/colors";
@@ -75,7 +75,7 @@ export default function SignupScreen() {
             marginTop={24}
           >
             {submitting ? (
-              <ActivityIndicator color={COLORS.white} />
+              <Spinner size={18} color={COLORS.white} />
             ) : (
               <StyledText fontSize={16} fontWeight="700" color={canSubmit ? COLORS.white : COLORS.textMuted}>Create account</StyledText>
             )}

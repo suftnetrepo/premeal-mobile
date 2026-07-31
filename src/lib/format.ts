@@ -7,3 +7,8 @@ export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 }
+
+/** Mirrors kmToMiles in premeal-app's src/lib/geo.ts — same conversion, same unit shown everywhere else in the app. */
+export function kmToMiles(km: number): number {
+  return km * 0.621371;
+}

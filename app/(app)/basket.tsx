@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, LayoutAnimation, Platform, ScrollView, UIManager } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Easing, LayoutAnimation, Platform, Pressable, ScrollView, UIManager, View } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
@@ -7,11 +7,10 @@ import {
   StyledPage,
   Stack,
   StyledText,
-  StyledPressable,
   StyledShape,
   StyledImage,
   dialogueService,
-  theme,
+  StyledSpacer,
 } from "fluent-styles";
 import { useCart, type CartLine } from "../../src/cart/CartContext";
 import { ESTIMATED_DELIVERY_FEE_CENTS, summarizeSelection } from "../../src/cart/cart-utils";
@@ -29,9 +28,14 @@ function animateReflow() {
   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 }
 
-// ─── Small bordered circular icon button — quantity +/-, matches the "+"
-// button style already established on the restaurant menu screen. ────────────
-function CircleGlyphButton({
+const QTY_BUTTON_SIZE = 40;
+
+// ─── Quantity button — white, elevated, true circle at rest; an orange
+// overlay fades in on press. Two separate native-driver-safe animations
+// (scale + overlay opacity) instead of interpolating backgroundColor
+// directly — colour interpolation runs on the JS thread and was rendering
+// unreliably (a flat, permanently-tinted square instead of white-at-rest). ──
+function QuantityButton({
   glyph,
   onPress,
   disabled,
@@ -40,19 +44,58 @@ function CircleGlyphButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const pressedOpacity = useRef(new Animated.Value(0)).current;
+
+  function pressIn() {
+    if (disabled) return;
+    Animated.parallel([
+      Animated.timing(scale, { toValue: 0.86, duration: 90, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.timing(pressedOpacity, { toValue: 1, duration: 90, useNativeDriver: true }),
+    ]).start();
+  }
+  function pressOut() {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, friction: 5, useNativeDriver: true }),
+      Animated.timing(pressedOpacity, { toValue: 0, duration: 180, useNativeDriver: true }),
+    ]).start();
+  }
+
   return (
-    <ScalePressable onPress={onPress} disabled={disabled} toValue={0.85}>
-      <StyledShape
-        cycle
-        size={34}
-        borderWidth={1}
-        borderColor={theme.colors.gray[300]}
-        backgroundColor={disabled ? COLORS.bgMuted : "#FFFFFF"}
-        style={{ opacity: disabled ? 0.4 : 1 }}
+    <Pressable onPress={disabled ? undefined : onPress} onPressIn={pressIn} onPressOut={pressOut} disabled={disabled} hitSlop={8}>
+      <Animated.View
+        style={[
+          {
+            width: QTY_BUTTON_SIZE,
+            height: QTY_BUTTON_SIZE,
+            borderRadius: QTY_BUTTON_SIZE / 2,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            opacity: disabled ? 0.4 : 1,
+            transform: [{ scale }],
+            overflow: "hidden",
+          },
+          SHADOW_SOFT,
+        ]}
       >
-        <Icon name={glyph} size={15} color={theme.colors.gray[800]} />
-      </StyledShape>
-    </ScalePressable>
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: QTY_BUTTON_SIZE / 2,
+            backgroundColor: COLORS.primaryLight,
+            opacity: pressedOpacity,
+          }}
+        />
+        <Icon name={glyph} size={17} color={disabled ? COLORS.textMuted : COLORS.primary} />
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -86,78 +129,67 @@ function BasketLineCard({
 
   return (
     <Stack
-      horizontal
-      gap={14}
       backgroundColor={COLORS.bgCard}
-      borderRadius={26}
-      padding={16}
-      marginBottom={16}
-      style={SHADOW_CARD}
+      borderRadius={28}
+      padding={20}
+      marginBottom={12}
+      style={[{ position: "relative" }, SHADOW_CARD]}
     >
-      {line.menuItem.imageUrl ? (
-        <Stack style={{ width: 88 }}>
-          <StyledImage source={{ uri: line.menuItem.imageUrl }} height={88} borderRadius={20} />
-        </Stack>
-      ) : (
-        <Stack
-          width={88}
-          height={88}
-          borderRadius={20}
-          backgroundColor={COLORS.primaryLight}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StyledText fontSize={30}>🍽️</StyledText>
-        </Stack>
-      )}
+      <Stack horizontal gap={16}>
+        <View style={[{ borderRadius: 22 }, SHADOW_SOFT]}>
+          <Stack style={{ width: 96, borderRadius: 22, overflow: "hidden" }}>
+            {line.menuItem.imageUrl ? (
+              <StyledImage source={{ uri: line.menuItem.imageUrl }} height={96} resizeMode="cover" />
+            ) : (
+              <Stack width={96} height={96} backgroundColor={COLORS.primaryLight} alignItems="center" justifyContent="center">
+                <StyledText fontSize={32}>🍽️</StyledText>
+              </Stack>
+            )}
+          </Stack>
+        </View>
 
-      <Stack flex={1} gap={6}>
-        <Stack horizontal alignItems="flex-start" justifyContent="space-between" gap={8}>
+        <Stack flex={1} gap={8} style={{ paddingRight: 26 }}>
           <StyledText
-            fontSize={16}
+            fontSize={16.5}
             fontWeight="800"
             color={COLORS.textPrimary}
-            style={{ letterSpacing: -0.2, flexShrink: 1 }}
+            style={{ letterSpacing: -0.2 }}
             numberOfLines={2}
           >
             {line.menuItem.name}
           </StyledText>
-          <ScalePressable onPress={onRemove} toValue={0.85}>
-            <Stack
-              width={28}
-              height={28}
-              borderRadius={14}
-              alignItems="center"
-              justifyContent="center"
-              backgroundColor={COLORS.bgMuted}
-            >
-              <Icon name="trash-2" size={13} color={COLORS.textMuted} />
+
+          {modifiers.length > 0 && (
+            <StyledText fontSize={12.5} color={COLORS.textMuted} lineHeight={17} numberOfLines={2}>
+              {modifiers}
+            </StyledText>
+          )}
+
+          <Stack flex={1} horizontal alignItems="center" justifyContent="space-between" marginTop={2}>
+            <StyledText fontSize={17} fontWeight="800" color={COLORS.primary}>
+              {formatMoney(line.unitPriceCents * line.quantity)}
+            </StyledText>
+            <StyledSpacer flex={1} />
+            <Stack marginLeft={14} horizontal alignItems="center" gap={14}>
+              <QuantityButton glyph="minus" onPress={onDecrement} />
+              <Animated.View style={{ transform: [{ scale: qtyAnim }] }}>
+                <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary} style={{ minWidth: 22, textAlign: "center" }}>
+                  {line.quantity}
+                </StyledText>
+              </Animated.View>
+              <QuantityButton glyph="plus" onPress={onIncrement} />
             </Stack>
-          </ScalePressable>
-        </Stack>
-
-        {modifiers.length > 0 && (
-          <StyledText fontSize={12.5} color={COLORS.textMuted} numberOfLines={2}>
-            {modifiers}
-          </StyledText>
-        )}
-
-        <Stack horizontal alignItems="center" justifyContent="space-between" marginTop={4}>
-          <StyledText fontSize={16} fontWeight="800" color={COLORS.primary}>
-            {formatMoney(line.unitPriceCents * line.quantity)}
-          </StyledText>
-
-          <Stack horizontal alignItems="center" gap={12}>
-            <CircleGlyphButton glyph="minus" onPress={onDecrement} />
-            <Animated.View style={{ transform: [{ scale: qtyAnim }] }}>
-              <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ minWidth: 18, textAlign: "center" }}>
-                {line.quantity}
-              </StyledText>
-            </Animated.View>
-            <CircleGlyphButton glyph="plus" onPress={onIncrement} />
           </Stack>
         </Stack>
       </Stack>
+
+      <View style={{ position: "absolute", top: 14, right: 14 }}>
+        <ScalePressable onPress={onRemove} toValue={0.85}>
+          <Stack width={30} height={30} borderRadius={15} alignItems="center" justifyContent="center" backgroundColor={COLORS.errorLight}>
+            <Icon name="trash-2" size={14} color={COLORS.error} />
+          </Stack>
+        </ScalePressable>
+      </View>
     </Stack>
   );
 }
@@ -196,21 +228,45 @@ export default function BasketScreen() {
   const listAnim = useFadeUp(0);
   const summaryAnim = useFadeUp(100);
 
+  const [clearing, setClearing] = useState(false);
+  const clearAnim = useRef(new Animated.Value(1)).current;
+
   const deliveryFeeCents = cart.lines.length > 0 ? ESTIMATED_DELIVERY_FEE_CENTS : 0;
   const estimatedTotalCents = cart.subtotalCents + deliveryFeeCents;
 
   async function handleClear() {
     const confirmed = await dialogueService.confirm({
       title: "Clear basket?",
-      message: "This removes everything you've added so far.",
-      confirmLabel: "Clear",
+      message: "This will remove all items from your basket.",
+      confirmLabel: "Clear Basket",
       cancelLabel: "Cancel",
       destructive: true,
     });
-    if (confirmed) {
-      animateReflow();
+    if (!confirmed) return;
+
+    // Capture before clearCart() wipes cart.restaurantId, and rely on the
+    // restaurant query that's already been running since this screen
+    // mounted — if it resolved to real data, that restaurant is still
+    // available; if not (deleted, fetch failed), fall back to the listing.
+    const targetRestaurantId = cart.restaurantId;
+    const canReturnToRestaurant = Boolean(targetRestaurantId && restaurant);
+
+    setClearing(true);
+    Animated.timing(clearAnim, {
+      toValue: 0,
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => {
       cart.clearCart();
-    }
+      // replace(), not push() — an empty basket screen shouldn't linger in
+      // history for "back" to land on.
+      if (canReturnToRestaurant) {
+        router.replace(`/restaurant/${targetRestaurantId}`);
+      } else {
+        router.replace("/results");
+      }
+    });
   }
 
   function handleRemove(cartItemId: string) {
@@ -278,18 +334,28 @@ export default function BasketScreen() {
           </ScalePressable>
         </Stack>
       ) : (
-        <>
+        <Animated.View
+          style={{
+            flex: 1,
+            opacity: clearAnim,
+            transform: [{ scale: clearAnim.interpolate({ inputRange: [0, 1], outputRange: [0.97, 1] }) }],
+          }}
+          pointerEvents={clearing ? "none" : "auto"}
+        >
           <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
             <Animated.View style={listAnim}>
               <Stack horizontal alignItems="center" justifyContent="space-between" marginBottom={16}>
                 <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
                   Items ({cart.itemCount})
                 </StyledText>
-                <StyledPressable onPress={handleClear}>
-                  <StyledText fontSize={13} fontWeight="600" color={COLORS.error}>
-                    Clear basket
-                  </StyledText>
-                </StyledPressable>
+                <ScalePressable onPress={handleClear} toValue={0.94}>
+                  <Stack horizontal alignItems="center" gap={6}>
+                    <StyledText fontSize={13} fontWeight="600" color={COLORS.error}>
+                      Clear basket
+                    </StyledText>
+                    <Icon name="trash-2" size={14} color={COLORS.error} />
+                  </Stack>
+                </ScalePressable>
               </Stack>
 
               {cart.lines.map((line) => (
@@ -376,7 +442,7 @@ export default function BasketScreen() {
               </ScalePressable>
             </Stack>
           </Stack>
-        </>
+        </Animated.View>
       )}
     </StyledPage>
   );

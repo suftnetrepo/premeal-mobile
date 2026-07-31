@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ActivityIndicator, Animated, Dimensions, ScrollView, View } from "react-native";
+import { Animated, Dimensions, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -14,6 +14,7 @@ import {
   StyledShape,
   Popup,
   toastService,
+  Spinner,
 } from "fluent-styles";
 import { useCart } from "../../src/cart/CartContext";
 import { ESTIMATED_DELIVERY_FEE_CENTS } from "../../src/cart/cart-utils";
@@ -147,7 +148,16 @@ export default function CheckoutScreen() {
       });
 
       cart.clearCart();
-      router.replace(`/orders/${order.id}`);
+      // replace() alone only swaps the top of the stack — basket, restaurant
+      // detail, and results would still be sitting underneath, so "back"
+      // from the confirmation could surface an already-submitted, now-stale
+      // basket. Clear the stack back to Discover first, then rebuild it as
+      // [Discover, Orders, OrderDetail] — back goes to Order History (the
+      // more relevant destination right after placing an order), back again
+      // goes to Home.
+      router.dismissAll();
+      router.push("/orders");
+      router.push(`/orders/${order.id}`);
     } catch (err) {
       toastService.error("Could not place your order", apiErrorMessage(err));
     } finally {
@@ -338,7 +348,7 @@ export default function CheckoutScreen() {
                       style={promoInput.trim() ? SHADOW_CTA : undefined}
                     >
                       {validatePromo.isPending ? (
-                        <ActivityIndicator color={COLORS.white} />
+                        <Spinner size={18} color={COLORS.white} />
                       ) : (
                         <StyledText
                           fontSize={14}
@@ -421,7 +431,7 @@ export default function CheckoutScreen() {
                   </Svg>
                 )}
                 {submitting ? (
-                  <ActivityIndicator color={canPay ? COLORS.white : COLORS.textMuted} />
+                  <Spinner size={18} color={canPay ? COLORS.white : COLORS.textMuted} />
                 ) : (
                   <Stack horizontal alignItems="center" gap={7}>
                     <StyledText fontSize={16} fontWeight="700" color={canPay ? COLORS.white : COLORS.textMuted}>

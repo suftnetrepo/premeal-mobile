@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   ScrollView,
   Share,
@@ -21,6 +20,7 @@ import {
   StyledShape,
   StyledImage,
   theme,
+  Loader,
 } from "fluent-styles";
 import { useRestaurant } from "../../../src/hooks/useRestaurants";
 import { formatMoney, formatDate } from "../../../src/lib/format";
@@ -343,7 +343,7 @@ export default function RestaurantDetailScreen() {
         alignItems="center"
         justifyContent="center"
       >
-        <ActivityIndicator color={COLORS.primary} size="large" />
+        <Loader variant="spinner" color={COLORS.primary} />
       </StyledPage>
     );
   }

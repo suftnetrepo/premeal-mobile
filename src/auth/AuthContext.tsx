@@ -10,6 +10,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -71,8 +72,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  // Deliberately NOT wrapped in a try/catch that swallows failure like
+  // logout above — if this throws, the caller needs to know the account
+  // genuinely was not deleted, rather than the app quietly logging the
+  // person out locally while their real data is still sitting on the
+  // server untouched. The screen calling this is responsible for
+  // surfacing that failure honestly.
+  const deleteAccount = useCallback(async () => {
+    await authApi.deleteAccount();
+    await clearToken();
+    setUser(null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

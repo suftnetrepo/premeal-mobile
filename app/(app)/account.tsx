@@ -1,8 +1,7 @@
 import { router } from "expo-router";
-import Constants from "expo-constants";
 import { Animated, ScrollView } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape, dialogueService, toastService } from "fluent-styles";
+import { StyledPage, Stack, StyledText, StyledShape, dialogueService, loaderService, toastService } from "fluent-styles";
 import { useAuth } from "../../src/auth/AuthContext";
 import { BottomTabBar } from "../../src/components/BottomTabBar";
 import { COLORS } from "../../src/theme/colors";
@@ -15,26 +14,21 @@ const PRIMARY_ITEMS = [
   { icon: "home", title: "Browse restaurants", subtitle: "Discover and order your favourites", onPress: () => router.replace("/") },
 ];
 
-// These don't have screens behind them yet — tapping is honest about that
-// ("Coming soon") instead of routing to a page that doesn't exist. "About"
-// is the exception: it shows the app's real name/version via expo-constants.
-function comingSoon(feature: string) {
-  return () => toastService.info("Coming soon", `${feature} isn't available yet.`);
+// Promo codes have no "browse / manage" feature behind them — there's no
+// endpoint for it, just checkout's real /api/checkout/validate-promo. So
+// this doesn't open a page; it tells the customer where the real one lives.
+function explainPromoCodes() {
+  dialogueService.alert(
+    "Promo codes",
+    "Promo codes are entered during checkout, right before payment — there's nowhere else to browse or redeem one right now."
+  );
 }
 
 const SECONDARY_ITEMS = [
-  { icon: "star", title: "Favourites", subtitle: "Your favourite restaurants and dishes", onPress: comingSoon("Favourites") },
-  { icon: "tag", title: "Promo codes", subtitle: "View and manage your vouchers", onPress: comingSoon("Promo codes") },
-  { icon: "bell", title: "Notifications", subtitle: "Manage your notification preferences", onPress: comingSoon("Notifications") },
-  { icon: "shield", title: "Privacy & security", subtitle: "Manage your privacy and security", onPress: comingSoon("Privacy & security") },
-  { icon: "help-circle", title: "Help & support", subtitle: "Get help and contact us", onPress: comingSoon("Help & support") },
-  {
-    icon: "info",
-    title: "About",
-    subtitle: "App version and information",
-    onPress: () =>
-      dialogueService.alert("Pre-Meal", `Version ${Constants.expoConfig?.version ?? "1.0.0"}`),
-  },
+  { icon: "tag", title: "Promo codes", subtitle: "Where to enter a code", onPress: explainPromoCodes },
+  { icon: "shield", title: "Privacy & security", subtitle: "How your data is handled", onPress: () => router.push("/privacy") },
+  { icon: "help-circle", title: "Help & support", subtitle: "Get help and contact us", onPress: () => router.push("/help") },
+  { icon: "info", title: "About", subtitle: "How Pre-Meal works, app version", onPress: () => router.push("/about") },
 ];
 
 function SettingsRow({
@@ -84,7 +78,7 @@ function SettingsGroup({ items }: { items: typeof PRIMARY_ITEMS }) {
 }
 
 export default function AccountScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const initial = (user?.name ?? "?").trim().charAt(0).toUpperCase();
   const headerAnim = useFadeUp(0);
   const groupsAnim = useFadeUp(100);
@@ -98,6 +92,29 @@ export default function AccountScreen() {
       destructive: true,
     });
     if (confirmed) logout();
+  }
+
+  async function handleDeleteAccount() {
+    const confirmed = await dialogueService.confirm({
+      title: "Delete your account?",
+      message:
+        "This permanently removes your name, email, password, and saved addresses. This can't be undone, and you won't be able to log back in with this account.",
+      confirmLabel: "Delete ",
+      cancelLabel: "Cancel",
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await loaderService.wrap(() => deleteAccount(), { label: "Deleting your account…" });
+      router.replace("/");
+    } catch {
+      // Deliberately not silent — deleteAccount() in AuthContext doesn't
+      // swallow failures the way logout does, on purpose. If this
+      // throws, the account genuinely still exists server-side, and the
+      // person needs to know that rather than assume it worked.
+      toastService.error("Couldn't delete your account", "Check your connection and try again.");
+    }
   }
 
   return (
@@ -152,6 +169,27 @@ export default function AccountScreen() {
             <Icon name="log-out" size={17} color={COLORS.error} />
             <StyledText fontSize={15} fontWeight="700" color={COLORS.error}>
               Log out
+            </StyledText>
+          </Stack>
+        </ScalePressable>
+
+        {/* Filled, not outlined like Log out above — this is a
+            meaningfully more severe, irreversible action and shouldn't
+            read as a peer of it. */}
+        <ScalePressable onPress={handleDeleteAccount} toValue={0.97}>
+          <Stack
+            horizontal
+            alignItems="center"
+            justifyContent="center"
+            gap={8}
+            paddingVertical={17}
+            borderRadius={999}
+            backgroundColor={COLORS.error}
+            marginTop={12}
+          >
+            <Icon name="trash-2" size={17} color="#FFFFFF" />
+            <StyledText fontSize={15} fontWeight="700" color="#FFFFFF">
+              Delete account
             </StyledText>
           </Stack>
         </ScalePressable>

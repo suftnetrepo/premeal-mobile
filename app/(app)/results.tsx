@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Dimensions,
   Easing,
@@ -19,6 +18,7 @@ import {
   theme,
   StyledImage,
   StyledImageBackground,
+  Loader,
 } from "fluent-styles";
 import { useLocation } from "../../src/location/LocationContext";
 import { useRestaurants } from "../../src/hooks/useRestaurants";
@@ -27,7 +27,7 @@ import { BasketBar } from "../../src/components/BasketBar";
 import { BottomTabBar } from "../../src/components/BottomTabBar";
 import { AddressPickerPopup } from "../../src/components/AddressPickerPopup";
 import { cuisineEmoji, SUPPORTED_CUISINES } from "../../src/lib/cuisines";
-import { formatMoney } from "../../src/lib/format";
+import { formatMoney, kmToMiles } from "../../src/lib/format";
 import { COLORS } from "../../src/theme/colors";
 import type { Restaurant } from "../../src/api/types";
 
@@ -364,7 +364,7 @@ function RestaurantCard({
                   ·
                 </StyledText>
                 <StyledText fontSize={13} color={COLORS.textMuted}>
-                  {`${item.distanceKm.toFixed(1)} km`}
+                  {`${kmToMiles(item.distanceKm).toFixed(1)} mi`}
                 </StyledText>
               </>
             )}
@@ -644,7 +644,7 @@ export default function ResultsScreen() {
         {/* Loading / error */}
         {isLoading && (
           <Stack alignItems="center" paddingVertical={60}>
-            <ActivityIndicator color={COLORS.primary} size="large" />
+            <Loader variant="spinner" color={COLORS.primary} />
           </Stack>
         )}
         {error && (

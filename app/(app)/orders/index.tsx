@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ActivityIndicator, Animated, ScrollView } from "react-native";
+import { Animated, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape } from "fluent-styles";
+import { StyledPage, Stack, StyledText, StyledShape, Loader } from "fluent-styles";
 import { useMyOrders } from "../../../src/hooks/useOrders";
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { COLORS } from "../../../src/theme/colors";
@@ -175,7 +175,7 @@ export default function OrdersScreen() {
 
       {isLoading && (
         <Stack flex={1} alignItems="center" justifyContent="center">
-          <ActivityIndicator color={COLORS.primary} size="large" />
+          <Loader variant="spinner" color={COLORS.primary} />
         </Stack>
       )}
 

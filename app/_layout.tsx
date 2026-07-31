@@ -50,6 +50,7 @@ const PROTECTED_APP_ROUTES = new Set(["basket", "checkout", "orders", "addresses
 function RouteGuard({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
   const { hasOnboarded } = useOnboarding();
+  const { active: activeLocation } = useLocation();
  const segments = useSegments() as string[];
   const router = useRouter();
 
@@ -74,9 +75,17 @@ function RouteGuard({ children }: { children: ReactNode }) {
       return;
     }
 
-    // 3. Auth redirect — logged-in user lands on auth/onboarding screens
+    // 3. Auth redirect — logged-in user lands on auth/onboarding screens.
+    //    inAuthGroup covers both /login and /signup (segments[0] doesn't
+    //    distinguish between them), so this one branch already handles
+    //    both entry points, not just login. If they already have a
+    //    location set — e.g. they were mid-checkout on Results and got
+    //    sent to login — Discover's whole job is "get a location, then
+    //    get out of the way" (see index.tsx), so send them straight back
+    //    to Results instead of making them re-pick an address they'd
+    //    already set.
     if (hasOnboarded && user && (inAuthGroup || inOnboardingGroup)) {
-      router.replace("/");
+      router.replace(activeLocation ? "/results" : "/");
       return;
     }
 
@@ -86,7 +95,7 @@ function RouteGuard({ children }: { children: ReactNode }) {
     //    Doing it here too caused a race: RouteGuard fired router.replace("/")
     //    right after index.tsx fired router.push("/results"), winning the race
     //    and sending the user back to index instead of results.
-  }, [user, isLoading, hasOnboarded, segments, router]);
+  }, [user, isLoading, hasOnboarded, activeLocation, segments, router]);
 
   return <>{children}</>;
 }

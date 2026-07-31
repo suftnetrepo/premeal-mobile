@@ -44,3 +44,23 @@ export async function submitReview(orderId: string, input: SubmitReviewInput): P
   const { data } = await apiClient.post<{ review: Review }>(`/orders/${orderId}/review`, input);
   return data.review;
 }
+
+// Mirrors premeal-app's GET /api/orders/[id]/payment-action (src/lib/payment-actions.ts):
+// 401 not logged in, 403 not your order, 409 the order isn't actually
+// PAYMENT_ACTION_REQUIRED. Returns the existing PaymentIntent's client
+// secret — the payment method is already attached from the original
+// checkout attempt, so this only ever mounts a 3D Secure challenge.
+export async function getPaymentActionSecret(orderId: string): Promise<string> {
+  const { data } = await apiClient.get<{ clientSecret: string }>(`/orders/${orderId}/payment-action`);
+  return data.clientSecret;
+}
+
+export type CompletePaymentActionResult = { status: "succeeded" | "failed" | "still_requires_action" };
+
+// Mirrors premeal-app's POST /api/orders/[id]/complete-payment-action.
+// Re-verifies with Stripe server-side rather than trusting the client —
+// this call is what actually flips the order to CONFIRMED or DECLINED.
+export async function completePaymentAction(orderId: string): Promise<CompletePaymentActionResult> {
+  const { data } = await apiClient.post<CompletePaymentActionResult>(`/orders/${orderId}/complete-payment-action`);
+  return data;
+}

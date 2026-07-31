@@ -102,6 +102,10 @@ export type OrderItem = {
   priceCents: number;
   quantity: number;
   modifiers: OrderItemModifier[];
+  // Live MenuItem.imageUrl, not a snapshot — unlike nameSnapshot/priceCents.
+  // If a restaurant changes a dish's photo later, old orders show the new
+  // photo, not what was true when it was ordered. Accepted tradeoff.
+  menuItem: { imageUrl: string | null };
 };
 
 export type Order = {
