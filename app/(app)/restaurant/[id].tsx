@@ -23,6 +23,7 @@ import {
   Loader,
 } from "fluent-styles";
 import { useRestaurant } from "../../../src/hooks/useRestaurants";
+import { getNotAcceptingOrdersError } from "../../../src/api/restaurants";
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { cuisineEmoji } from "../../../src/lib/cuisines";
 import { useCart } from "../../../src/cart/CartContext";
@@ -344,6 +345,51 @@ export default function RestaurantDetailScreen() {
         justifyContent="center"
       >
         <Loader variant="spinner" color={COLORS.primary} />
+      </StyledPage>
+    );
+  }
+
+  const notAccepting = getNotAcceptingOrdersError(error);
+  if (notAccepting) {
+    return (
+      <StyledPage
+        flex={1}
+        backgroundColor={COLORS.bg}
+        alignItems="center"
+        justifyContent="center"
+        padding={32}
+      >
+        <Stack alignItems="center" gap={14}>
+          <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
+            <Icon name="clock" size={34} color={COLORS.primary} />
+          </StyledShape>
+          <StyledText
+            fontSize={17}
+            fontWeight="800"
+            color={COLORS.textPrimary}
+            textAlign="center"
+          >
+            Not taking orders right now
+          </StyledText>
+          <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+            {notAccepting.restaurantName} has paused new orders for the
+            moment. Check back later.
+          </StyledText>
+          <ScalePressable onPress={() => router.back()} toValue={0.96}>
+            <Stack
+              backgroundColor={COLORS.primary}
+              borderRadius={999}
+              paddingHorizontal={24}
+              paddingVertical={14}
+              marginTop={8}
+              style={SHADOW_CTA}
+            >
+              <StyledText fontSize={14.5} fontWeight="700" color={COLORS.white}>
+                Back to restaurants
+              </StyledText>
+            </Stack>
+          </ScalePressable>
+        </Stack>
       </StyledPage>
     );
   }

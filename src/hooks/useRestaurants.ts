@@ -13,5 +13,9 @@ export function useRestaurant(id: string | undefined) {
     queryKey: ["restaurant", id],
     queryFn: () => restaurantsApi.getRestaurant(id as string),
     enabled: Boolean(id),
+    // A 409 for a paused restaurant is deterministic, not transient — retrying
+    // it just delays showing the "not accepting orders" state.
+    retry: (failureCount, error) =>
+      !restaurantsApi.getNotAcceptingOrdersError(error) && failureCount < 3,
   });
 }
