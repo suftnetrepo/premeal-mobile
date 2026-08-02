@@ -104,19 +104,36 @@ function PaymentActionCard({ orderId, onDone }: { orderId: string; onDone: () =>
     setError(null);
 
     let clientSecret: string;
+    let paymentMethodId: string | null;
     try {
-      clientSecret = await getPaymentActionSecret(orderId);
+      ({ clientSecret, paymentMethodId } = await getPaymentActionSecret(orderId));
     } catch (err) {
       setError(apiErrorMessage(err));
       setVerifying(false);
       return;
     }
 
-    // No card re-entry needed — the PaymentIntent already has the payment
-    // method attached from the original checkout attempt. This just
-    // completes whatever the card issuer wants (a 3D Secure challenge),
-    // handled entirely by the Stripe SDK.
-    const { error: stripeError } = await confirmPayment(clientSecret);
+    // Off-session confirmation attempts that fail with authentication_required
+    // make Stripe detach the payment method from the PaymentIntent (it stays
+    // recoverable via the same client secret, but the method has to be
+    // re-supplied explicitly) — so there's genuinely nothing to reuse if the
+    // backend didn't find one. Surface that rather than calling Stripe with
+    // missing data, which would just produce another opaque SDK error.
+    if (!paymentMethodId) {
+      setError("Something's wrong with this payment — please contact support.");
+      setVerifying(false);
+      return;
+    }
+
+    // No card re-entry needed — paymentMethodId reuses the payment method
+    // already on file. handleNextAction() can't do this (it has no field
+    // for a payment method at all); confirmPayment() with paymentMethodId
+    // in paymentMethodData is the RN SDK's documented way to resume a
+    // PaymentIntent using a saved method with zero card re-entry.
+    const { error: stripeError } = await confirmPayment(clientSecret, {
+      paymentMethodType: "Card",
+      paymentMethodData: { paymentMethodId },
+    });
     if (stripeError) {
       setError(stripeError.message ?? "Verification failed.");
       setVerifying(false);
