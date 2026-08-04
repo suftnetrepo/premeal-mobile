@@ -101,8 +101,7 @@ export function BottomTabBar({ active }: { active: Tab }) {
   return (
     <Stack
       marginHorizontal={24}
-      marginBottom={Math.max(insets.bottom, 12)}
-      marginTop={4}
+    
     >
       <Stack
         horizontal

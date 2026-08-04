@@ -69,7 +69,7 @@ function SettingsRow({
 
 function SettingsGroup({ items }: { items: typeof PRIMARY_ITEMS }) {
   return (
-    <Stack backgroundColor={COLORS.bgCard} borderRadius={28} overflow="hidden" style={SHADOW_CARD}>
+    <Stack backgroundColor={COLORS.bgCard} borderRadius={28} overflow="hidden" style={[SHADOW_CARD, { elevation: 1.5 }]}>
       {items.map((item, i) => (
         <SettingsRow key={item.title} {...item} isLast={i === items.length - 1} />
       ))}

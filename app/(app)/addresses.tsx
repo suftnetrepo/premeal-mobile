@@ -69,7 +69,7 @@ function AddressCard({
       borderRadius={26}
       padding={18}
       marginBottom={16}
-      style={SHADOW_CARD}
+      style={[SHADOW_CARD, { elevation: 1.5 }]}
     >
       <StyledShape size={52} cycle backgroundColor={ico.bg}>
         <Icon name={ico.name as any} size={22} color={ico.color} />
@@ -148,7 +148,7 @@ function SuggestionsList({
   const anim = useFadeUp(0);
   return (
     <Animated.View style={anim}>
-      <Stack backgroundColor={COLORS.bgCard} borderRadius={22} overflow="hidden" style={SHADOW_CARD}>
+      <Stack backgroundColor={COLORS.bgCard} borderRadius={22} overflow="hidden" style={[SHADOW_CARD, { elevation: 1.5 }]}>
         {suggestions.map((s, i) => (
           <Stack key={`${s.latitude},${s.longitude}`}>
             {i > 0 && <Stack height={1} backgroundColor={COLORS.border} marginHorizontal={18} />}

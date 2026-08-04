@@ -72,7 +72,7 @@ const SLIDES = [
     subtitle: "Confirmed within 30 min",
     cta: "Explore now",
     image:
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+      require("../../assets/slide_1.png"),
   },
   {
     key: "transparent",
@@ -82,7 +82,7 @@ const SLIDES = [
     subtitle: "You pay what the restaurant charges",
     cta: "See restaurants",
     image:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
+      require("../../assets/slide_2.png"),
   },
   {
     key: "reviews",
@@ -92,7 +92,7 @@ const SLIDES = [
     subtitle: "Every review is from a real delivery",
     cta: "Browse now",
     image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
+      require("../../assets/slide_3.png"),
   },
 ];
 
@@ -210,17 +210,15 @@ export default function DiscoverScreen() {
   const heroAnimStyle = useFadeUp(0);
   const valuePropsAnimStyle = useFadeUp(120);
 
-  // Returning user — if location is already ready when this screen mounts
-  // (saved location loaded from SecureStore or saved addresses), skip straight
-  // to results. Only fires once on mount, not on every status change, to avoid
-  // conflicting with the tab bar's own router.replace("/results").
+  // Returning user — location seeding (SecureStore read, or saved-address
+  // lookup) resolves asynchronously, so status is still "loading" on the
+  // very first render. Depend on status so this fires once it flips to
+  // "ready", not just at mount.
   useEffect(() => {
     if (status === "ready") {
       router.replace("/results");
     }
-    // Intentionally only on mount — no [status] dependency.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [status]);
 
   function handleSliderScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
     const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
@@ -343,7 +341,7 @@ export default function DiscoverScreen() {
             >
               <Icon name="search" size={16} color={COLORS.textMuted} />
               <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
-                Search by address to see restaurants…
+                Search by address…
               </StyledText>
               <Stack
                 width={1}
@@ -393,7 +391,7 @@ export default function DiscoverScreen() {
                     ]}
                   >
                     <StyledImageBackground
-                      source={{ uri: slide.image }}
+                      source={slide.image}
                       flex={1}
                       height={250}
                       justifyContent="flex-end"
@@ -537,15 +535,6 @@ export default function DiscoverScreen() {
         {/* ── Platform value props ───────────────────────────────── */}
         <Animated.View style={valuePropsAnimStyle}>
           <Stack paddingHorizontal={H_PAD} marginBottom={24}>
-            <StyledText
-              fontSize={21}
-              fontWeight="800"
-              color={COLORS.textPrimary}
-              marginBottom={16}
-              style={{ letterSpacing: -0.3 }}
-            >
-              ✨ Pre-Meal
-            </StyledText>
             <Stack horizontal flexWrap="wrap" gap={14}>
               {VALUE_PROPS.map((v) => (
                 <Stack
@@ -555,7 +544,7 @@ export default function DiscoverScreen() {
                   borderRadius={22}
                   padding={18}
                   gap={10}
-                  style={SHADOW_CARD}
+                  style={[SHADOW_CARD, { elevation: 1.5 }]}
                 >
                   <StyledShape
                     size={52}
@@ -592,7 +581,6 @@ export default function DiscoverScreen() {
 
       {cart.itemCount > 0 && <BasketBar />}
       <BottomTabBar active="home" />
-
       <AddressPickerPopup
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}

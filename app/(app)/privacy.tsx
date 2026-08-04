@@ -15,7 +15,7 @@ function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={SHADOW_CARD}>
+    <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
       <Stack horizontal alignItems="center" gap={12}>
         <StyledShape size={40} cycle backgroundColor={COLORS.primaryLight}>
           <Icon name={icon as any} size={17} color={COLORS.primary} />

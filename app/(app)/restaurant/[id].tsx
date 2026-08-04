@@ -155,7 +155,7 @@ function MenuCard({ item, onPress }: { item: MenuItem; onPress: () => void }) {
       borderRadius={24}
       padding={16}
       marginBottom={8}
-      style={SHADOW_CARD}
+      style={[SHADOW_CARD, { elevation: 1.5 }]}
     >
       {item.imageUrl ? (
         <Stack style={{ width: 84 }}>
@@ -213,24 +213,22 @@ function MenuCard({ item, onPress }: { item: MenuItem; onPress: () => void }) {
         disabled={!item.isAvailable}
         toValue={0.88}
       >
-        <Stack
-          width={48}
-          height={48}
-          borderRadius={24}
-          alignItems="center"
-          justifyContent="center"
-          style={[item.isAvailable ? SHADOW_CTA : undefined]}
-        >
-          {item.isAvailable ? (
-            <StyledShape cycle size={48} borderWidth={1} borderColor={theme.colors.gray[300]}>
-              <Icon name="plus" size={20} color={theme.colors.gray[800]} />
-            </StyledShape>
-          ) : (
-            <StyledShape cycle size={48} backgroundColor={COLORS.bgMuted}>
-              <Icon name="plus" size={20} color={COLORS.textMuted} />
-            </StyledShape>
-          )}
-        </Stack>
+        {item.isAvailable ? (
+          <StyledShape
+            cycle
+            size={48}
+            backgroundColor={COLORS.bgCard}
+            borderWidth={1}
+            borderColor={theme.colors.gray[300]}
+            style={SHADOW_CTA}
+          >
+            <Icon name="plus" size={20} color={theme.colors.gray[800]} />
+          </StyledShape>
+        ) : (
+          <StyledShape cycle size={48} backgroundColor={COLORS.bgMuted}>
+            <Icon name="plus" size={20} color={COLORS.textMuted} />
+          </StyledShape>
+        )}
       </ScalePressable>
     </Stack>
   );
@@ -564,6 +562,7 @@ export default function RestaurantDetailScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 24,
+              paddingVertical: 10,
               alignItems: "center",
             }}
           >

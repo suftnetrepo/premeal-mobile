@@ -17,6 +17,7 @@ export const COLORS = {
   textPrimary: "#1C1917", // stone-900
   textSecondary: "#57534E", // stone-600
   textMuted: "#78716C", // stone-500
+  textMutedLight: "#e5e3e2", // stone-400
   border: "#E7E5E4", // stone-200
   bg: "#FAFAF9", // stone-50
   bgCard: "#FFFFFF",

@@ -23,7 +23,7 @@ import { getPaymentActionSecret, completePaymentAction } from "../../../src/api/
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { apiErrorMessage } from "../../../src/api/client";
 import { COLORS } from "../../../src/theme/colors";
-import { STATUS_LABEL, STATUS_COLOR } from "../../../src/lib/order-status";
+import { STATUS_LABEL, STATUS_COLOR, STATUS_COLOR_LIGHT } from "../../../src/lib/order-status";
 import { ScalePressable, useFadeUp, SHADOW_SOFT, SHADOW_CARD, SHADOW_CTA } from "../../../src/lib/animations";
 import { callPhoneNumber } from "../../../src/lib/phone";
 import type { Order, OrderStatus } from "../../../src/api/types";
@@ -164,7 +164,7 @@ function PaymentActionCard({ orderId, onDone }: { orderId: string; onDone: () =>
   }
 
   return (
-    <Stack backgroundColor={COLORS.warningLight} borderRadius={28} padding={20} gap={12} style={SHADOW_CARD}>
+    <Stack backgroundColor={COLORS.warningLight} borderRadius={28} padding={20} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
       <Stack horizontal alignItems="center" gap={14}>
         <StyledShape size={52} cycle backgroundColor="#FFFFFF">
           <Icon name="shield" size={22} color={COLORS.warning} />
@@ -273,7 +273,7 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
   // (see premeal-app's src/lib/reviews.ts), so there's nothing to wire up.
   if (review) {
     return (
-      <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={SHADOW_CARD}>
+      <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
         <Stack horizontal alignItems="center" gap={10}>
           <StyledShape size={40} cycle backgroundColor={COLORS.primaryLight}>
             <Ionicons name="star" size={17} color={COLORS.primary} />
@@ -297,7 +297,7 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
 
   if (justSubmitted) {
     return (
-      <Stack backgroundColor={COLORS.successLight} borderRadius={26} padding={24} alignItems="center" gap={8} style={SHADOW_CARD}>
+      <Stack backgroundColor={COLORS.successLight} borderRadius={26} padding={24} alignItems="center" gap={8} style={[SHADOW_CARD, { elevation: 1.5 }]}>
         <StyledShape size={52} cycle backgroundColor="#FFFFFF">
           <Icon name="check" size={24} color={COLORS.success} />
         </StyledShape>
@@ -312,7 +312,7 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
   }
 
   return (
-    <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={22} gap={18} style={SHADOW_CARD}>
+    <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={22} gap={18} style={[SHADOW_CARD, { elevation: 1.5 }]}>
       <Stack horizontal alignItems="center" gap={12}>
         <StyledShape size={44} cycle backgroundColor={COLORS.primaryLight}>
           <Ionicons name="star" size={19} color={COLORS.primary} />
@@ -481,6 +481,7 @@ export default function OrderDetailScreen() {
   const status = {
     ...(STATUS_CONFIG[order.status] ?? { icon: "help-circle", message: "" }),
     color: STATUS_COLOR[order.status] ?? COLORS.textMuted,
+    backgroundColor: STATUS_COLOR_LIGHT[order.status] ?? COLORS.bgMuted,
   };
 
   return (
@@ -496,40 +497,43 @@ export default function OrderDetailScreen() {
           {/* ── Status card ─────────────────────────────────────────── */}
           <Animated.View style={statusAnim}>
             <Stack
-              backgroundColor={`${status.color}12`}
+              horizontal
+              backgroundColor={COLORS.bgCard}
               borderRadius={28}
-              padding={20}
-              gap={12}
-              style={SHADOW_CARD}
+              overflow="hidden"
+              style={[SHADOW_CARD, { elevation: 1.5 }]}
             >
-              <Stack horizontal alignItems="center" gap={14}>
-                <StyledShape size={52} cycle backgroundColor="#FFFFFF">
-                  <StatusIcon icon={status.icon} iconSet={status.iconSet} size={24} color={status.color} />
-                </StyledShape>
-                <Stack flex={1} gap={3}>
-                  <StyledText fontSize={18} fontWeight="800" color={status.color} style={{ letterSpacing: -0.2 }}>
-                    {STATUS_LABEL[order.status] ?? order.status}
-                  </StyledText>
-                  <Stack horizontal alignItems="center" gap={6}>
-                    <Icon name="calendar" size={12} color={COLORS.textMuted} />
-                    <StyledText fontSize={12.5} color={COLORS.textMuted}>
-                      {formatDate(order.slot.date)} · {order.slot.windowStart}–{order.slot.windowEnd}
+              <Stack width={4} backgroundColor={status.color} />
+              <Stack flex={1} padding={20} gap={12}>
+                <Stack horizontal alignItems="center" gap={14}>
+                  <StyledShape size={52} cycle backgroundColor={status.backgroundColor}>
+                    <StatusIcon icon={status.icon} iconSet={status.iconSet} size={24} color={status.color} />
+                  </StyledShape>
+                  <Stack flex={1} gap={3}>
+                    <StyledText fontSize={18} fontWeight="800" color={status.color} style={{ letterSpacing: -0.2 }}>
+                      {STATUS_LABEL[order.status] ?? order.status}
                     </StyledText>
+                    <Stack horizontal alignItems="center" gap={6}>
+                      <Icon name="calendar" size={12} color={COLORS.textMuted} />
+                      <StyledText fontSize={12.5} color={COLORS.textMuted}>
+                        {formatDate(order.slot.date)} · {order.slot.windowStart}–{order.slot.windowEnd}
+                      </StyledText>
+                    </Stack>
                   </Stack>
                 </Stack>
+
+                {status.message.length > 0 && (
+                  <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
+                    {status.message}
+                  </StyledText>
+                )}
+
+                {order.cancelledByRestaurant && order.restaurantCancelReason && (
+                  <StyledText fontSize={13.5} color={COLORS.error} lineHeight={19}>
+                    {order.restaurantCancelReason}
+                  </StyledText>
+                )}
               </Stack>
-
-              {status.message.length > 0 && (
-                <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
-                  {status.message}
-                </StyledText>
-              )}
-
-              {order.cancelledByRestaurant && order.restaurantCancelReason && (
-                <StyledText fontSize={13.5} color={COLORS.error} lineHeight={19}>
-                  {order.restaurantCancelReason}
-                </StyledText>
-              )}
             </Stack>
           </Animated.View>
 
@@ -541,7 +545,7 @@ export default function OrderDetailScreen() {
               )}
 
               {/* ── Order items ───────────────────────────────────────── */}
-              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} style={SHADOW_CARD}>
+              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} style={[SHADOW_CARD, { elevation: 1.5 }]}>
                 <StyledText
                   fontSize={12.5}
                   fontWeight="700"
@@ -598,7 +602,7 @@ export default function OrderDetailScreen() {
               </Stack>
 
               {/* ── Payment summary ───────────────────────────────────── */}
-              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={SHADOW_CARD}>
+              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
                 <StyledText
                   fontSize={12.5}
                   fontWeight="700"
@@ -647,7 +651,7 @@ export default function OrderDetailScreen() {
               {order.status === "DELIVERED" && <ReviewSection orderId={order.id} review={order.review} />}
 
               {/* ── Delivery address ──────────────────────────────────── */}
-              <Stack horizontal alignItems="center" gap={14} backgroundColor={COLORS.bgCard} borderRadius={26} padding={18} style={SHADOW_CARD}>
+              <Stack horizontal alignItems="center" gap={14} backgroundColor={COLORS.bgCard} borderRadius={26} padding={18} style={[SHADOW_CARD, { elevation: 1.5 }]}>
                 <StyledShape size={46} cycle backgroundColor={COLORS.primaryLight}>
                   <Icon name="map-pin" size={19} color={COLORS.primary} />
                 </StyledShape>

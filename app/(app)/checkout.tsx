@@ -314,7 +314,7 @@ export default function CheckoutScreen() {
                   padding={10}
                   borderRadius={22}
                   backgroundColor={COLORS.bgCard}
-                  style={SHADOW_CARD}
+                  style={[SHADOW_CARD, { elevation: 1.5 }]}
                 >
                   <Stack flex={1}>
                     <StyledTextInput
@@ -368,7 +368,7 @@ export default function CheckoutScreen() {
 
         {/* ── Price breakdown ─────────────────────────────────────── */}
         <Animated.View style={summaryAnim}>
-          <Stack gap={14} padding={20} borderRadius={26} backgroundColor={COLORS.bgCard} marginTop={16} style={SHADOW_CARD}>
+          <Stack gap={14} padding={20} borderRadius={26} backgroundColor={COLORS.bgCard} marginTop={16} style={[SHADOW_CARD, { elevation: 1.5 }]}>
             <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
               Order summary
             </StyledText>
@@ -391,7 +391,7 @@ export default function CheckoutScreen() {
 
       {/* ── Floating payment panel ───────────────────────────────────── */}
       <Stack paddingHorizontal={16} paddingTop={4} paddingBottom={Math.max(insets.bottom, 16)}>
-        <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={SHADOW_CARD}>
+        <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={[SHADOW_CARD, { elevation: 1.5 }]}>
           {statusMessage && (
             <StyledText fontSize={13} color={COLORS.textMuted} textAlign="center">
               {statusMessage}
@@ -653,7 +653,7 @@ function SectionCard({
         backgroundColor={COLORS.bgCard}
         borderRadius={26}
         padding={18}
-        style={SHADOW_CARD}
+        style={[SHADOW_CARD, { elevation: 1.5 }]}
       >
         <View style={{ position: "relative" }}>
           <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>

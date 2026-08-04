@@ -9,26 +9,32 @@
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
-      "expo-location",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFF7ED"
+        }
+      ]
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Pre-Meal uses your location to show restaurants that deliver to you."
-      }
+        "NSCameraUsageDescription": "Pre-Meal needs camera access so you can scan your card instead of typing it in at checkout."
+      },
+      "bundleIdentifier": "com.suftnet.premeal"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#EA580C",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": [
-        "ACCESS_FINE_LOCATION"
-      ],
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.suftnet.premeal"
     },
     "web": {
       "favicon": "./assets/favicon.png"

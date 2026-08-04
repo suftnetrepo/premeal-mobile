@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Animated, ScrollView } from "react-native";
+import { Animated, RefreshControl, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import { StyledPage, Stack, StyledText, StyledShape, Loader } from "fluent-styles";
@@ -66,7 +66,7 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
 
   return (
     <ScalePressable onPress={onPress} toValue={0.98} style={{ marginBottom: 18 }}>
-      <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={SHADOW_CARD}>
+      <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={[SHADOW_CARD, { elevation: 1.5 }]}>
         <Stack horizontal alignItems="center" gap={14}>
           <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>
             <Icon name="shopping-bag" size={21} color={COLORS.primary} />
@@ -143,7 +143,7 @@ function OrderList({ orders }: { orders: Order[] }) {
 }
 
 export default function OrdersScreen() {
-  const { data: orders, isLoading, error } = useMyOrders();
+  const { data: orders, isLoading, isRefetching, refetch, error } = useMyOrders();
   const [filter, setFilter] = useState<FilterValue>("ALL");
 
   const filtered = (orders ?? []).filter((o) => matchesFilter(o, filter));
@@ -188,7 +188,13 @@ export default function OrdersScreen() {
       )}
 
       {!isLoading && !error && (
-        <ScrollView contentContainerStyle={{ padding: H_PAD, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ padding: H_PAD, paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={COLORS.primary} />
+          }
+        >
           {(orders ?? []).length > 0 && (
             <Stack marginBottom={20}>
               <FilterChips value={filter} onChange={setFilter} />

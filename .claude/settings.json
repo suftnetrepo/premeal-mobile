@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill -f \"find / -name idb\")",
+      "Bash(python3 -c \"import idb; print\\(idb.__file__\\)\")",
+      "Read(//usr/local/lib/python3.13/site-packages/idb/**)",
+      "Bash(python3 -m pip show fb-idb)",
+      "Read(//usr/local/bin/**)",
+      "Read(//usr/local/lib/python3.13/site-packages/**)",
+      "Read(//usr/local/lib/python3.13/site-packages/fb_idb-1.1.7.dist-info/**)",
+      "Bash(python3 -m idb.cli.main --help)",
+      "Bash(python3 -m idb.cli.main ui --help)",
+      "Bash(idb_companion --udid 23B92312-2BD6-4305-9F86-1ED58115817B --grpc-port 10882)",
+      "Bash(python3 -m idb.cli.main connect localhost 10882)"
+    ]
+  }
+}

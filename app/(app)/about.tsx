@@ -70,7 +70,7 @@ export default function AboutScreen() {
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
         <Stack gap={20}>
-          <Stack gap={8}>
+          <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={8} style={[SHADOW_CARD, { elevation: 1.5 }]}>
             <StyledText fontSize={11} fontWeight="800" color={COLORS.primary} style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
               Pre-Meal
             </StyledText>
@@ -85,7 +85,7 @@ export default function AboutScreen() {
             </StyledText>
           </Stack>
 
-          <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={20} style={SHADOW_CARD}>
+          <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={20} style={[SHADOW_CARD, { elevation: 1.5 }]}>
             <StyledText fontSize={12.5} fontWeight="700" color={COLORS.textMuted} style={{ textTransform: "uppercase", letterSpacing: 0.6 }}>
               How it works
             </StyledText>

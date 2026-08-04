@@ -3,6 +3,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  RefreshControl,
   ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
@@ -460,6 +461,8 @@ export default function ResultsScreen() {
   const {
     data: restaurants,
     isLoading,
+    isRefetching,
+    refetch,
     error,
   } = useRestaurants(active ? { lat: active.lat, lng: active.lng } : undefined);
 
@@ -566,15 +569,13 @@ export default function ResultsScreen() {
               </Stack>
             </Stack>
             <StyledPressable
+             width={48}
+              height={48}
+              borderRadius={24}
+              backgroundColor="#FFFFFF"
+              alignItems="center"
+              justifyContent="center"
               style={[
-                {
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: "#FFFFFF",
-                  alignItems: "center",
-                  justifyContent: "center",
-                },
                 SHADOW_SOFT,
               ]}
               accessibilityRole="button"
@@ -597,7 +598,7 @@ export default function ResultsScreen() {
             >
               <Icon name="search" size={16} color={COLORS.textMuted} />
               <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
-                Search by address to see restaurants…
+                Search by address…
               </StyledText>
               <Stack
                 width={1}
@@ -615,13 +616,20 @@ export default function ResultsScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: 20, paddingBottom: 8 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={COLORS.primary}
+          />
+        }
       >
         {/* Cuisine chips */}
         <Animated.View style={chipsAnim}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: H_PAD }}
+            contentContainerStyle={{ paddingHorizontal: H_PAD, paddingVertical: 10 }}
           >
             <CuisineChip
               label="All"

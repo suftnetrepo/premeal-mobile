@@ -133,7 +133,7 @@ function BasketLineCard({
       borderRadius={28}
       padding={20}
       marginBottom={12}
-      style={[{ position: "relative" }, SHADOW_CARD]}
+      style={[{ position: "relative" }, SHADOW_CARD, { elevation: 1.5 }]}
     >
       <Stack horizontal gap={16}>
         <View style={[{ borderRadius: 22 }, SHADOW_SOFT]}>
@@ -370,7 +370,7 @@ export default function BasketScreen() {
             </Animated.View>
 
             <Animated.View style={summaryAnim}>
-              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={14} marginTop={8} style={SHADOW_CARD}>
+              <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={14} marginTop={8} style={[SHADOW_CARD, { elevation: 1.5 }]}>
                 <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary} marginBottom={2}>
                   Order summary
                 </StyledText>
@@ -388,7 +388,7 @@ export default function BasketScreen() {
 
           {/* ── Floating checkout panel ─────────────────────────────── */}
           <Stack paddingHorizontal={16} paddingBottom={16} paddingTop={4}>
-            <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={18} gap={12} style={SHADOW_CARD}>
+            <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={18} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
               <Stack horizontal alignItems="center" justifyContent="space-between">
                 <Stack gap={2}>
                   <StyledText fontSize={12} color={COLORS.textMuted}>
