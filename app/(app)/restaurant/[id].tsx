@@ -556,6 +556,29 @@ export default function RestaurantDetailScreen() {
               Delivery slots
             </StyledText>
           </Stack>
+          {/* Only shown when it's actually relevant, same rule as the web
+              settings page — the slots above are already filtered
+              server-side to exclude anything that violates this, so this
+              explains why a customer might not see slots as soon as
+              "tomorrow" rather than leaving them to guess. Nothing shown
+              for a restaurant with no lead-time requirement (the default). */}
+          {restaurant.minimumLeadTimeDays > 0 && (
+            <Stack
+              horizontal
+              gap={10}
+              alignItems="flex-start"
+              backgroundColor={COLORS.warningLight}
+              borderRadius={20}
+              marginHorizontal={24}
+              padding={14}
+            >
+              <Icon name="info" size={16} color={COLORS.warning} style={{ marginTop: 1 }} />
+              <StyledText fontSize={12.5} color={COLORS.textSecondary} lineHeight={18} style={{ flex: 1 }}>
+                This restaurant requires at least {restaurant.minimumLeadTimeDays} day
+                {restaurant.minimumLeadTimeDays === 1 ? "" : "s"}&apos; notice.
+              </StyledText>
+            </Stack>
+          )}
           <ScrollView
             ref={slotsScrollRef}
             horizontal

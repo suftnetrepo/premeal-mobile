@@ -56,6 +56,13 @@ export type Restaurant = {
   latitude: number | null;
   longitude: number | null;
   deliveryRadiusKm: number | null;
+  // Restaurant-wide minimum notice for orders, separate from each
+  // DeliverySlot's own cutoff — see premeal-app's Restaurant.minimumLeadTimeDays.
+  // The backend already excludes any slot that violates this from
+  // deliverySlots below, so this is only needed here to show the
+  // explanatory note near the slot picker (see restaurant/[id].tsx) —
+  // it was already present in the API response before this was declared.
+  minimumLeadTimeDays: number;
   averageRating: number | null;
   reviewCount: number;
   menuItems: MenuItem[];
