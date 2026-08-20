@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import {
-  Dimensions,
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,8 +11,14 @@ import { Feather as Icon } from "@expo/vector-icons";
 import { Stack, StyledText, StyledPressable } from "fluent-styles";
 import { useOnboarding } from "../../src/onboarding/OnboardingContext";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const HERO_HEIGHT = Math.round(SCREEN_HEIGHT * 0.58);
+// ─── Hero/card split is done with flex ratios (58/42), not a pixel height
+// computed from a one-time Dimensions.get("window") snapshot — that stale
+// snapshot doesn't track the actual available height in iPadOS's
+// iPhone-compatibility window, which was clipping the subtitle text under
+// the bottom nav bar (App Store review rejection, iPad Air 11" M3 /
+// iPadOS 26.6, Guideline 4). The paging ScrollView below is also given
+// flex: 1 so it's bounded to the real remaining space above that nav bar
+// instead of being free to overflow behind it. ──────────────────────────────
 
 // ─── Brand tokens — lifted from premeal-app/src/app/globals.css + the
 // Tailwind classes actually used on the homepage (orange-600 / stone-*),
@@ -84,9 +90,9 @@ const SLIDES: Slide[] = [
 ];
 
 // ─── One hero photo + copy pane ────────────────────────────────────────────────
-function SlidePane({ slide }: { slide: Slide }) {
+function SlidePane({ slide, width }: { slide: Slide; width: number }) {
   return (
-    <Stack width={SCREEN_WIDTH}>
+    <Stack width={width}>
       {/* No stock photo here on purpose — same principle applied
           everywhere else in this app: a deliberate, designed placeholder
           reads as "intentional" rather than "unfinished," which matters
@@ -98,7 +104,7 @@ function SlidePane({ slide }: { slide: Slide }) {
           on the Discover screen's own hero carousel. Swap for real
           licensed food photography whenever that's ready — this isn't
           meant to be the permanent final look, just an honest one. */}
-      <Stack height={HERO_HEIGHT} width={SCREEN_WIDTH} backgroundColor={PRIMARY} overflow="hidden">
+      <Stack flex={58} width={width} backgroundColor={PRIMARY} overflow="hidden">
         <Stack position="absolute" top={-40} right={-40} width={200} height={200} borderRadius={100} backgroundColor="rgba(255,255,255,0.10)" />
         <Stack position="absolute" top={100} left={-30} width={140} height={140} borderRadius={70} backgroundColor="rgba(255,255,255,0.07)" />
         <Stack position="absolute" bottom={-50} right={40} width={180} height={180} borderRadius={90} backgroundColor="rgba(255,255,255,0.07)" />
@@ -124,7 +130,7 @@ function SlidePane({ slide }: { slide: Slide }) {
       </Stack>
 
       <Stack
-        flex={1}
+        flex={42}
         marginTop={-24}
         backgroundColor="#FFFFFF"
         borderTopLeftRadius={28}
@@ -159,6 +165,7 @@ function SlidePane({ slide }: { slide: Slide }) {
 
 export default function OnboardingWelcomeScreen() {
   const insets = useSafeAreaInsets();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const { complete } = useOnboarding();
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
@@ -197,9 +204,10 @@ export default function OnboardingWelcomeScreen() {
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
         onMomentumScrollEnd={handleMomentumEnd}
+        style={{ flex: 1 }}
       >
         {SLIDES.map((slide) => (
-          <SlidePane key={slide.key} slide={slide} />
+          <SlidePane key={slide.key} slide={slide} width={SCREEN_WIDTH} />
         ))}
       </ScrollView>
 
