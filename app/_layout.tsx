@@ -3,6 +3,15 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { GlobalPortalProvider, PortalManager } from "fluent-styles";
+import {
+  useFonts,
+  PlusJakartaSans_300Light,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans'
 import { AuthProvider, useAuth } from "../src/auth/AuthContext";
 import { CartProvider } from "../src/cart/CartContext";
 import { OnboardingProvider, useOnboarding } from "../src/onboarding/OnboardingContext";
@@ -101,6 +110,20 @@ function RouteGuard({ children }: { children: ReactNode }) {
 }
 
 export default function RootLayout() {
+  
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_300Light,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>

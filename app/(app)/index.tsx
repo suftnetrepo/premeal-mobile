@@ -12,12 +12,12 @@ import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import {
   StyledPage,
-  StyledText,
   StyledPressable,
   StyledShape,
   StyledImageBackground,
   Stack,
 } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import {
   useLocation,
   type ActiveLocation,
@@ -268,7 +268,7 @@ export default function DiscoverScreen() {
                 </StyledShape>
               </Stack>
               <Stack gap={2} flex={1}>
-                <StyledText
+                <Text
                   fontSize={10.5}
                   fontWeight="300"
                   paddingLeft={3}
@@ -277,7 +277,7 @@ export default function DiscoverScreen() {
                   textTransform="uppercase"
                 >
                   Delivering to
-                </StyledText>
+                </Text>
                 <StyledPressable
                   flexDirection="row"
                   alignItems="center"
@@ -293,7 +293,7 @@ export default function DiscoverScreen() {
                     size={13}
                     color={COLORS.primary}
                   />
-                  <StyledText
+                  <Text
                     fontSize={16}
                     fontWeight="800"
                     color={COLORS.textPrimary}
@@ -304,7 +304,7 @@ export default function DiscoverScreen() {
                     }}
                   >
                     {pillLabel}
-                  </StyledText>
+                  </Text>
                   <Icon name="chevron-down" size={14} color={COLORS.primary} />
                 </StyledPressable>
               </Stack>
@@ -340,9 +340,9 @@ export default function DiscoverScreen() {
               style={SHADOW_SOFT}
             >
               <Icon name="search" size={16} color={COLORS.textMuted} />
-              <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
+              <Text fontSize={13.5} color={COLORS.textMuted} flex={1}>
                 Search by address…
-              </StyledText>
+              </Text>
               <Stack
                 width={1}
                 height={20}
@@ -446,41 +446,41 @@ export default function DiscoverScreen() {
                           paddingVertical={5}
                           alignSelf="flex-start"
                         >
-                          <StyledText
+                          <Text
                             fontSize={11}
                             fontWeight="700"
                             color="#FFFFFF"
                           >
                             {slide.pill}
-                          </StyledText>
+                          </Text>
                         </Stack>
-                        <StyledText
+                        <Text
                           fontSize={23}
                           fontWeight="800"
                           lineHeight={28}
                           style={{ letterSpacing: -0.4 }}
                         >
-                          <StyledText
+                          <Text
                             fontSize={23}
                             fontWeight="800"
                             color="#FFFFFF"
                           >
                             {slide.titleLead}
-                          </StyledText>
-                          <StyledText
+                          </Text>
+                          <Text
                             fontSize={23}
                             fontWeight="800"
                             color={COLORS.primary}
                           >
                             {slide.titleHighlight}
-                          </StyledText>
-                        </StyledText>
-                        <StyledText
+                          </Text>
+                        </Text>
+                        <Text
                           fontSize={13}
                           color="rgba(255,255,255,0.82)"
                         >
                           {slide.subtitle}
-                        </StyledText>
+                        </Text>
                         <Stack
                           horizontal
                           alignItems="center"
@@ -493,13 +493,13 @@ export default function DiscoverScreen() {
                           marginTop={6}
                           style={SHADOW_CTA}
                         >
-                          <StyledText
+                          <Text
                             fontSize={13.5}
                             fontWeight="700"
                             color="#FFFFFF"
                           >
                             {slide.cta}
-                          </StyledText>
+                          </Text>
                           <Icon name="arrow-right" size={14} color="#FFFFFF" />
                         </Stack>
                       </Stack>
@@ -557,21 +557,21 @@ export default function DiscoverScreen() {
                       color={COLORS.primary}
                     />
                   </StyledShape>
-                  <StyledText
+                  <Text
                     fontSize={14}
                     fontWeight="800"
                     color={COLORS.textPrimary}
                     style={{ letterSpacing: -0.1 }}
                   >
                     {v.title}
-                  </StyledText>
-                  <StyledText
+                  </Text>
+                  <Text
                     fontSize={12.5}
                     color={COLORS.textMuted}
                     lineHeight={17}
                   >
                     {v.body}
-                  </StyledText>
+                  </Text>
                 </Stack>
               ))}
             </Stack>

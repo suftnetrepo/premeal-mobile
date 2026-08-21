@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { TextInput, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { StyledPage, Stack, StyledText, StyledPressable, Spinner } from "fluent-styles";
+import { StyledPage, Stack, StyledPressable, Spinner } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useAuth } from "../../src/auth/AuthContext";
 import { apiErrorMessage } from "../../src/api/client";
 import { COLORS } from "../../src/theme/colors";
@@ -34,14 +35,14 @@ export default function LoginScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 28 }} keyboardShouldPersistTaps="handled">
           <Stack gap={6} marginBottom={32}>
-            <StyledText fontSize={32} fontWeight="800" color={COLORS.primary}>Pre-Meal</StyledText>
-            <StyledText fontSize={26} fontWeight="800" color={COLORS.textPrimary}>Log in</StyledText>
-            <StyledText fontSize={14} color={COLORS.textMuted}>Good to see you again.</StyledText>
+            <Text variant="display" color={COLORS.primary}>Pre-Meal</Text>
+            <Text fontSize={26} fontWeight="800" color={COLORS.textPrimary}>Log in</Text>
+            <Text variant="body" color={COLORS.textMuted}>Good to see you again.</Text>
           </Stack>
 
           <Stack gap={14}>
             <Stack gap={6}>
-              <StyledText fontSize={13} fontWeight="600" color={COLORS.textSecondary}>Email</StyledText>
+              <Text fontSize={13} fontWeight="600" color={COLORS.textSecondary}>Email</Text>
               <TextInput
                 placeholder="you@example.com" placeholderTextColor={COLORS.textMuted}
                 value={email} onChangeText={setEmail}
@@ -50,7 +51,7 @@ export default function LoginScreen() {
               />
             </Stack>
             <Stack gap={6}>
-              <StyledText fontSize={13} fontWeight="600" color={COLORS.textSecondary}>Password</StyledText>
+              <Text fontSize={13} fontWeight="600" color={COLORS.textSecondary}>Password</Text>
               <TextInput
                 placeholder="••••••••" placeholderTextColor={COLORS.textMuted}
                 value={password} onChangeText={setPassword} secureTextEntry
@@ -61,7 +62,7 @@ export default function LoginScreen() {
 
           {error && (
             <Stack marginTop={10} backgroundColor={COLORS.errorLight} borderRadius={10} padding={12}>
-              <StyledText fontSize={13} color={COLORS.error}>{error}</StyledText>
+              <Text fontSize={13} color={COLORS.error}>{error}</Text>
             </Stack>
           )}
 
@@ -77,15 +78,15 @@ export default function LoginScreen() {
             {submitting ? (
               <Spinner size={18} color={COLORS.white} />
             ) : (
-              <StyledText fontSize={16} fontWeight="700" color={canSubmit ? COLORS.white : COLORS.textMuted}>Log in</StyledText>
+              <Text fontSize={16} fontWeight="700" color={canSubmit ? COLORS.white : COLORS.textMuted}>Log in</Text>
             )}
           </StyledPressable>
 
           <StyledPressable alignItems="center" paddingVertical={16} onPress={() => router.push("/signup")}>
-            <StyledText fontSize={14} color={COLORS.textMuted}>
+            <Text variant="body" color={COLORS.textMuted}>
               No account?{" "}
-              <StyledText fontSize={14} fontWeight="700" color={COLORS.primary}>Sign up</StyledText>
-            </StyledText>
+              <Text fontSize={14} fontWeight="700" color={COLORS.primary}>Sign up</Text>
+            </Text>
           </StyledPressable>
         </ScrollView>
       </KeyboardAvoidingView>

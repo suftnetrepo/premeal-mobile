@@ -8,7 +8,8 @@ import {
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather as Icon } from "@expo/vector-icons";
-import { Stack, StyledText, StyledPressable } from "fluent-styles";
+import { Stack, StyledPressable } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useOnboarding } from "../../src/onboarding/OnboardingContext";
 
 // ─── Hero/card split is done with flex ratios (58/42), not a pixel height
@@ -117,14 +118,14 @@ function SlidePane({ slide, width }: { slide: Slide; width: number }) {
 
         {slide.eyebrow && (
           <Stack position="absolute" top={64} left={24} right={80}>
-            <StyledText
+            <Text
               fontSize={11}
               fontWeight="700"
               color="#FFFFFF"
               style={{ letterSpacing: 1.5 }}
             >
               {slide.eyebrow}
-            </StyledText>
+            </Text>
           </Stack>
         )}
       </Stack>
@@ -141,7 +142,7 @@ function SlidePane({ slide, width }: { slide: Slide; width: number }) {
       >
         <Stack alignItems="center" gap={2}>
           {slide.titleLines.map((line, i) => (
-            <StyledText
+            <Text
               key={i}
               fontSize={26}
               fontWeight="800"
@@ -151,13 +152,13 @@ function SlidePane({ slide, width }: { slide: Slide; width: number }) {
               style={{ letterSpacing: -0.3 }}
             >
               {line.text}
-            </StyledText>
+            </Text>
           ))}
         </Stack>
         <Stack height={14} />
-        <StyledText fontSize={15} lineHeight={22} color={STONE_600} textAlign="center">
+        <Text fontSize={15} lineHeight={22} color={STONE_600} textAlign="center">
           {slide.subtitle}
-        </StyledText>
+        </Text>
       </Stack>
     </Stack>
   );
@@ -223,9 +224,9 @@ export default function OnboardingWelcomeScreen() {
           backgroundColor="rgba(255,255,255,0.24)"
           onPress={finishOnboarding}
         >
-          <StyledText fontSize={13} fontWeight="600" color="#FFFFFF">
+          <Text fontSize={13} fontWeight="600" color="#FFFFFF">
             Skip
-          </StyledText>
+          </Text>
         </StyledPressable>
       )}
 
@@ -265,9 +266,9 @@ export default function OnboardingWelcomeScreen() {
             elevation: 6,
           }}
         >
-          <StyledText fontSize={16} fontWeight="700" color="#FFFFFF">
+          <Text fontSize={16} fontWeight="700" color="#FFFFFF">
             {isLast ? "Get Started" : "Next"}
-          </StyledText>
+          </Text>
         </StyledPressable>
 
         {isLast && (
@@ -280,12 +281,12 @@ export default function OnboardingWelcomeScreen() {
               router.replace("/login");
             }}
           >
-            <StyledText fontSize={14} color={STONE_500}>
+            <Text variant="body" color={STONE_500}>
               Already have an account?{" "}
-              <StyledText fontSize={14} fontWeight="700" color={PRIMARY}>
+              <Text fontSize={14} fontWeight="700" color={PRIMARY}>
                 Log in
-              </StyledText>
-            </StyledText>
+              </Text>
+            </Text>
           </StyledPressable>
         )}
       </Stack>

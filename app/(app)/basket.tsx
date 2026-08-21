@@ -6,12 +6,12 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import {
   StyledPage,
   Stack,
-  StyledText,
   StyledShape,
   StyledImage,
   dialogueService,
   StyledSpacer,
 } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useCart, type CartLine } from "../../src/cart/CartContext";
 import { ESTIMATED_DELIVERY_FEE_CENTS, summarizeSelection } from "../../src/cart/cart-utils";
 import { useRestaurant } from "../../src/hooks/useRestaurants";
@@ -142,14 +142,14 @@ function BasketLineCard({
               <StyledImage source={{ uri: line.menuItem.imageUrl }} height={96} resizeMode="cover" />
             ) : (
               <Stack width={96} height={96} backgroundColor={COLORS.primaryLight} alignItems="center" justifyContent="center">
-                <StyledText fontSize={32}>🍽️</StyledText>
+                <Text fontSize={32}>🍽️</Text>
               </Stack>
             )}
           </Stack>
         </View>
 
         <Stack flex={1} gap={8} style={{ paddingRight: 26 }}>
-          <StyledText
+          <Text
             fontSize={16.5}
             fontWeight="800"
             color={COLORS.textPrimary}
@@ -157,25 +157,25 @@ function BasketLineCard({
             numberOfLines={2}
           >
             {line.menuItem.name}
-          </StyledText>
+          </Text>
 
           {modifiers.length > 0 && (
-            <StyledText fontSize={12.5} color={COLORS.textMuted} lineHeight={17} numberOfLines={2}>
+            <Text fontSize={12.5} color={COLORS.textMuted} lineHeight={17} numberOfLines={2}>
               {modifiers}
-            </StyledText>
+            </Text>
           )}
 
           <Stack flex={1} horizontal alignItems="center" justifyContent="space-between" marginTop={2}>
-            <StyledText fontSize={17} fontWeight="800" color={COLORS.primary}>
+            <Text fontSize={17} fontWeight="800" color={COLORS.primary}>
               {formatMoney(line.unitPriceCents * line.quantity)}
-            </StyledText>
+            </Text>
             <StyledSpacer flex={1} />
             <Stack marginLeft={14} horizontal alignItems="center" gap={14}>
               <QuantityButton glyph="minus" onPress={onDecrement} />
               <Animated.View style={{ transform: [{ scale: qtyAnim }] }}>
-                <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary} style={{ minWidth: 22, textAlign: "center" }}>
+                <Text fontSize={17} fontWeight="800" color={COLORS.textPrimary} style={{ minWidth: 22, textAlign: "center" }}>
                   {line.quantity}
-                </StyledText>
+                </Text>
               </Animated.View>
               <QuantityButton glyph="plus" onPress={onIncrement} />
             </Stack>
@@ -210,13 +210,13 @@ function SummaryRow({
     <Stack horizontal alignItems="center" justifyContent="space-between">
       <Stack horizontal alignItems="center" gap={8}>
         <Icon name={icon as any} size={14} color={bold ? COLORS.textPrimary : COLORS.primary} />
-        <StyledText fontSize={bold ? 15 : 14} fontWeight={bold ? "800" : "400"} color={bold ? COLORS.textPrimary : COLORS.textSecondary}>
+        <Text fontSize={bold ? 15 : 14} fontWeight={bold ? "800" : "400"} color={bold ? COLORS.textPrimary : COLORS.textSecondary}>
           {label}
-        </StyledText>
+        </Text>
       </Stack>
-      <StyledText fontSize={bold ? 17 : 14} fontWeight={bold ? "800" : "700"} color={bold ? COLORS.primary : COLORS.textPrimary}>
+      <Text fontSize={bold ? 17 : 14} fontWeight={bold ? "800" : "700"} color={bold ? COLORS.primary : COLORS.textPrimary}>
         {value}
-      </StyledText>
+      </Text>
     </Stack>
   );
 }
@@ -289,9 +289,9 @@ export default function BasketScreen() {
                 <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
               </Stack>
             </ScalePressable>
-            <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+            <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
               Your Basket
-            </StyledText>
+            </Text>
             {/* Balances the back button so the title stays centered. */}
             <Stack width={40} height={40} />
           </Stack>
@@ -303,10 +303,10 @@ export default function BasketScreen() {
               style={{ alignSelf: "center" }}
             >
               <Stack horizontal alignItems="center" gap={6}>
-                <StyledText fontSize={14}>{cuisineEmoji(restaurant?.cuisine ?? "")}</StyledText>
-                <StyledText fontSize={14.5} fontWeight="700" color={COLORS.textSecondary}>
+                <Text variant="body">{cuisineEmoji(restaurant?.cuisine ?? "")}</Text>
+                <Text fontSize={14.5} fontWeight="700" color={COLORS.textSecondary}>
                   {cart.restaurantName}
-                </StyledText>
+                </Text>
                 <Icon name="chevron-right" size={14} color={COLORS.textMuted} />
               </Stack>
             </ScalePressable>
@@ -319,17 +319,17 @@ export default function BasketScreen() {
           <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
             <Icon name="shopping-bag" size={34} color={COLORS.primary} />
           </StyledShape>
-          <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
+          <Text fontSize={17} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
             Your basket is empty
-          </StyledText>
-          <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+          </Text>
+          <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
             Add something from a restaurant to get started.
-          </StyledText>
+          </Text>
           <ScalePressable onPress={() => router.replace("/")} toValue={0.96}>
             <Stack backgroundColor={COLORS.primary} borderRadius={999} paddingHorizontal={24} paddingVertical={14} marginTop={8} style={SHADOW_CTA}>
-              <StyledText fontSize={14.5} fontWeight="700" color={COLORS.white}>
+              <Text fontSize={14.5} fontWeight="700" color={COLORS.white}>
                 Browse restaurants
-              </StyledText>
+              </Text>
             </Stack>
           </ScalePressable>
         </Stack>
@@ -345,14 +345,14 @@ export default function BasketScreen() {
           <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
             <Animated.View style={listAnim}>
               <Stack horizontal alignItems="center" justifyContent="space-between" marginBottom={16}>
-                <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
+                <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
                   Items ({cart.itemCount})
-                </StyledText>
+                </Text>
                 <ScalePressable onPress={handleClear} toValue={0.94}>
                   <Stack horizontal alignItems="center" gap={6}>
-                    <StyledText fontSize={13} fontWeight="600" color={COLORS.error}>
+                    <Text fontSize={13} fontWeight="600" color={COLORS.error}>
                       Clear basket
-                    </StyledText>
+                    </Text>
                     <Icon name="trash-2" size={14} color={COLORS.error} />
                   </Stack>
                 </ScalePressable>
@@ -371,17 +371,17 @@ export default function BasketScreen() {
 
             <Animated.View style={summaryAnim}>
               <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={14} marginTop={8} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-                <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary} marginBottom={2}>
+                <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary} marginBottom={2}>
                   Order summary
-                </StyledText>
+                </Text>
                 <SummaryRow icon="shopping-bag" label="Subtotal" value={formatMoney(cart.subtotalCents)} />
                 <SummaryRow icon="truck" label="Delivery fee (est.)" value={formatMoney(deliveryFeeCents)} />
                 <Stack borderTopWidth={1} borderTopColor={COLORS.border} paddingTop={12}>
                   <SummaryRow icon="check-circle" label="Estimated total" value={formatMoney(estimatedTotalCents)} bold />
                 </Stack>
-                <StyledText fontSize={11.5} color={COLORS.textMuted}>
+                <Text fontSize={11.5} color={COLORS.textMuted}>
                   Delivery fee is an estimate — the final total is confirmed at checkout.
-                </StyledText>
+                </Text>
               </Stack>
             </Animated.View>
           </ScrollView>
@@ -391,26 +391,26 @@ export default function BasketScreen() {
             <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={18} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
               <Stack horizontal alignItems="center" justifyContent="space-between">
                 <Stack gap={2}>
-                  <StyledText fontSize={12} color={COLORS.textMuted}>
+                  <Text variant="bodySmall" color={COLORS.textMuted}>
                     Total
-                  </StyledText>
-                  <StyledText fontSize={22} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
+                  </Text>
+                  <Text fontSize={22} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
                     {formatMoney(estimatedTotalCents)}
-                  </StyledText>
+                  </Text>
                 </Stack>
                 {cart.selectedSlot ? (
                   <Stack alignItems="flex-end" gap={2}>
-                    <StyledText fontSize={12} color={COLORS.textMuted}>
+                    <Text variant="bodySmall" color={COLORS.textMuted}>
                       Delivery
-                    </StyledText>
-                    <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+                    </Text>
+                    <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
                       {formatDate(cart.selectedSlot.date)} · {cart.selectedSlot.windowStart}
-                    </StyledText>
+                    </Text>
                   </Stack>
                 ) : (
-                  <StyledText fontSize={12} color={COLORS.textMuted} style={{ maxWidth: "45%" }} textAlign="right">
+                  <Text variant="bodySmall" color={COLORS.textMuted} style={{ maxWidth: "45%" }} textAlign="right">
                     Delivery time chosen at checkout
-                  </StyledText>
+                  </Text>
                 )}
               </Stack>
 
@@ -433,9 +433,9 @@ export default function BasketScreen() {
                     <Rect width="100%" height="100%" fill="url(#checkout-cta)" />
                   </Svg>
                   <Stack horizontal alignItems="center" gap={8}>
-                    <StyledText fontSize={16} fontWeight="700" color={COLORS.white}>
+                    <Text fontSize={16} fontWeight="700" color={COLORS.white}>
                       Go to checkout
-                    </StyledText>
+                    </Text>
                     <Icon name="arrow-right" size={17} color={COLORS.white} />
                   </Stack>
                 </Stack>

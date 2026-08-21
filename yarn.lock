@@ -562,6 +562,11 @@
   resolved "https://registry.npmjs.org/@expo-google-fonts/material-symbols/-/material-symbols-0.4.42.tgz"
   integrity sha512-KZmHZRcthJ3KFZZlpzHjopA9guZgWR9fb3uVZlTR0BNlvG2pw1bnYBCpkze2PB0vRllwGhAM7lWXsfmcWCbXYg==
 
+"@expo-google-fonts/plus-jakarta-sans@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/plus-jakarta-sans/-/plus-jakarta-sans-0.2.3.tgz#d13debe67e40b2059797e5bbb8e1f32c13312ab5"
+  integrity sha512-7vukKMax5xrMlrf0DCzOpqqCQwxYaUXH4BmVxbal5Xrys1LIQmaqoiPftd7RtTSRbwPEhU/GYqIGrkuCAydRrQ==
+
 "@expo/cli@^57.0.10":
   version "57.0.10"
   resolved "https://registry.npmjs.org/@expo/cli/-/cli-57.0.10.tgz"

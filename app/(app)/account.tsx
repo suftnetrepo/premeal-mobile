@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { Animated, ScrollView } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape, dialogueService, loaderService, toastService } from "fluent-styles";
+import { StyledPage, Stack, StyledShape, dialogueService, loaderService, toastService } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useAuth } from "../../src/auth/AuthContext";
 import { BottomTabBar } from "../../src/components/BottomTabBar";
 import { COLORS } from "../../src/theme/colors";
@@ -52,12 +53,12 @@ function SettingsRow({
             <Icon name={icon as any} size={19} color={COLORS.primary} />
           </StyledShape>
           <Stack flex={1} gap={2}>
-            <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
+            <Text fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
               {title}
-            </StyledText>
-            <StyledText fontSize={12.5} color={COLORS.textMuted}>
+            </Text>
+            <Text fontSize={12.5} color={COLORS.textMuted}>
               {subtitle}
-            </StyledText>
+            </Text>
           </Stack>
           <Icon name="chevron-right" size={19} color={COLORS.textMuted} />
         </Stack>
@@ -124,17 +125,17 @@ export default function AccountScreen() {
           <Stack horizontal alignItems="center" justifyContent="space-between" paddingHorizontal={20} paddingTop={8} paddingBottom={4}>
             <Stack horizontal alignItems="center" gap={14} flex={1}>
               <StyledShape size={64} cycle backgroundColor={COLORS.primaryLight}>
-                <StyledText fontSize={24} fontWeight="800" color={COLORS.primary}>
+                <Text fontSize={24} fontWeight="800" color={COLORS.primary}>
                   {initial}
-                </StyledText>
+                </Text>
               </StyledShape>
               <Stack gap={2} flex={1}>
-                <StyledText fontSize={21} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.3 }}>
+                <Text fontSize={21} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.3 }}>
                   Hey {user?.name?.split(" ")[0] ?? "there"}! 👋
-                </StyledText>
-                <StyledText fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
+                </Text>
+                <Text fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
                   {user?.email}
-                </StyledText>
+                </Text>
               </Stack>
             </Stack>
             {/* Decorative — this page already contains the app's settings. */}
@@ -167,9 +168,9 @@ export default function AccountScreen() {
             marginTop={20}
           >
             <Icon name="log-out" size={17} color={COLORS.error} />
-            <StyledText fontSize={15} fontWeight="700" color={COLORS.error}>
+            <Text fontSize={15} fontWeight="700" color={COLORS.error}>
               Log out
-            </StyledText>
+            </Text>
           </Stack>
         </ScalePressable>
 
@@ -188,9 +189,9 @@ export default function AccountScreen() {
             marginTop={12}
           >
             <Icon name="trash-2" size={17} color="#FFFFFF" />
-            <StyledText fontSize={15} fontWeight="700" color="#FFFFFF">
+            <Text fontSize={15} fontWeight="700" color="#FFFFFF">
               Delete account
-            </StyledText>
+            </Text>
           </Stack>
         </ScalePressable>
       </ScrollView>

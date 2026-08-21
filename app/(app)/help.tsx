@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape } from "fluent-styles";
+import { StyledPage, Stack, StyledShape } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { COLORS } from "../../src/theme/colors";
 import { ScalePressable, SHADOW_SOFT, SHADOW_CARD } from "../../src/lib/animations";
 
@@ -20,9 +21,9 @@ function HelpCard({
         <StyledShape size={40} cycle backgroundColor={COLORS.primaryLight}>
           <Icon name={icon as any} size={17} color={COLORS.primary} />
         </StyledShape>
-        <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flex: 1 }}>
+        <Text fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flex: 1 }}>
           {title}
-        </StyledText>
+        </Text>
       </Stack>
       <Stack gap={8}>{children}</Stack>
     </Stack>
@@ -31,9 +32,9 @@ function HelpCard({
 
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={20}>
+    <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={20}>
       {children}
-    </StyledText>
+    </Text>
   );
 }
 
@@ -47,9 +48,9 @@ export default function HelpScreen() {
               <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
             </Stack>
           </ScalePressable>
-          <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
             Help & Support
-          </StyledText>
+          </Text>
           <Stack width={40} height={40} />
         </Stack>
       </StyledPage.Header.Full>

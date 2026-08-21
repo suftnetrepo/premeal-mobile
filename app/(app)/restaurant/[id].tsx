@@ -13,7 +13,6 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import {
   StyledPage,
   Stack,
-  StyledText,
   dialogueService,
   toastService,
   StyledImageBackground,
@@ -22,6 +21,7 @@ import {
   theme,
   Loader,
 } from "fluent-styles";
+import { Text } from "../../../src/components/text";
 import { useRestaurant } from "../../../src/hooks/useRestaurants";
 import { getNotAcceptingOrdersError } from "../../../src/api/restaurants";
 import { formatMoney, formatDate } from "../../../src/lib/format";
@@ -111,18 +111,18 @@ function SlotChip({
         backgroundColor={disabled ? COLORS.bgMuted : theme.colors.gray[1]}
         style={[{ opacity: disabled ? 0.7 : 1 }, SHADOW_SOFT]}
       >
-        <StyledText fontSize={14} fontWeight="800" color={COLORS.textPrimary}>
+        <Text fontSize={14} fontWeight="800" color={COLORS.textPrimary}>
           {formatDate(slot.date)}
-        </StyledText>
+        </Text>
         <Stack horizontal alignItems="center" gap={5}>
           <Icon
             name="clock"
             size={11}
             color={selected ? COLORS.primary : COLORS.textMuted}
           />
-          <StyledText fontSize={12.5} color={COLORS.textMuted}>
+          <Text fontSize={12.5} color={COLORS.textMuted}>
             {slot.windowStart}–{slot.windowEnd}
-          </StyledText>
+          </Text>
         </Stack>
         <Stack horizontal alignItems="center" gap={5}>
           <Stack
@@ -131,13 +131,13 @@ function SlotChip({
             borderRadius={3}
             backgroundColor={availabilityColor}
           />
-          <StyledText fontSize={11} fontWeight="700" color={availabilityColor}>
+          <Text fontSize={11} fontWeight="700" color={availabilityColor}>
             {disabled
               ? "Full"
               : slot.status === "limited"
                 ? "Almost full"
                 : "Available"}
-          </StyledText>
+          </Text>
         </Stack>
       </Stack>
     </ScalePressable>
@@ -174,12 +174,12 @@ function MenuCard({ item, onPress }: { item: MenuItem; onPress: () => void }) {
           alignItems="center"
           justifyContent="center"
         >
-          <StyledText fontSize={30}>🍽️</StyledText>
+          <Text fontSize={30}>🍽️</Text>
         </Stack>
       )}
 
       <Stack marginHorizontal={8} flex={1} gap={4}>
-        <StyledText
+        <Text
           fontSize={16.5}
           fontWeight="800"
           color={COLORS.textPrimary}
@@ -187,25 +187,25 @@ function MenuCard({ item, onPress }: { item: MenuItem; onPress: () => void }) {
           style={{ letterSpacing: -0.2 }}
         >
           {item.name}
-        </StyledText>
+        </Text>
         {item.description && (
-          <StyledText
+          <Text
             fontSize={13}
             color={COLORS.textMuted}
             numberOfLines={2}
             lineHeight={18}
           >
             {item.description}
-          </StyledText>
+          </Text>
         )}
-        <StyledText
+        <Text
           fontSize={16}
           fontWeight="800"
           color={COLORS.primary}
           style={{ marginTop: 2 }}
         >
           {formatMoney(item.priceCents)}
-        </StyledText>
+        </Text>
       </Stack>
 
       <ScalePressable
@@ -361,18 +361,18 @@ export default function RestaurantDetailScreen() {
           <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
             <Icon name="clock" size={34} color={COLORS.primary} />
           </StyledShape>
-          <StyledText
+          <Text
             fontSize={17}
             fontWeight="800"
             color={COLORS.textPrimary}
             textAlign="center"
           >
             Not taking orders right now
-          </StyledText>
-          <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+          </Text>
+          <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
             {notAccepting.restaurantName} has paused new orders for the
             moment. Check back later.
-          </StyledText>
+          </Text>
           <ScalePressable onPress={() => router.back()} toValue={0.96}>
             <Stack
               backgroundColor={COLORS.primary}
@@ -382,9 +382,9 @@ export default function RestaurantDetailScreen() {
               marginTop={8}
               style={SHADOW_CTA}
             >
-              <StyledText fontSize={14.5} fontWeight="700" color={COLORS.white}>
+              <Text fontSize={14.5} fontWeight="700" color={COLORS.white}>
                 Back to restaurants
-              </StyledText>
+              </Text>
             </Stack>
           </ScalePressable>
         </Stack>
@@ -401,9 +401,9 @@ export default function RestaurantDetailScreen() {
         justifyContent="center"
         padding={24}
       >
-        <StyledText fontSize={15} color={COLORS.error} textAlign="center">
+        <Text fontSize={15} color={COLORS.error} textAlign="center">
           Could not load this restaurant.
-        </StyledText>
+        </Text>
       </StyledPage>
     );
   }
@@ -472,7 +472,7 @@ export default function RestaurantDetailScreen() {
           paddingBottom={6}
           gap={10}
         >
-          <StyledText
+          <Text
             fontSize={28}
             fontWeight="800"
             color={COLORS.textPrimary}
@@ -480,7 +480,7 @@ export default function RestaurantDetailScreen() {
             style={{ letterSpacing: -0.4 }}
           >
             {restaurant.name}
-          </StyledText>
+          </Text>
 
           <Stack
             horizontal
@@ -490,48 +490,48 @@ export default function RestaurantDetailScreen() {
             justifyContent="center"
           >
             <Stack horizontal alignItems="center" gap={5}>
-              <StyledText fontSize={14}>
+              <Text variant="body">
                 {cuisineEmoji(restaurant.cuisine)}
-              </StyledText>
-              <StyledText fontSize={15} color={COLORS.textMuted}>
+              </Text>
+              <Text fontSize={15} color={COLORS.textMuted}>
                 {restaurant.cuisine}
-              </StyledText>
+              </Text>
             </Stack>
-            <StyledText fontSize={13} color={COLORS.border}>
+            <Text fontSize={13} color={COLORS.border}>
               ·
-            </StyledText>
+            </Text>
             {restaurant.averageRating !== null ? (
               <Stack horizontal alignItems="center" gap={4}>
                 <Icon name="star" size={14} color="#F59E0B" />
-                <StyledText
+                <Text
                   fontSize={15}
                   fontWeight="700"
                   color={COLORS.textPrimary}
                 >
                   {restaurant.averageRating.toFixed(1)}
-                </StyledText>
-                <StyledText fontSize={14} color={COLORS.textMuted}>
+                </Text>
+                <Text variant="body" color={COLORS.textMuted}>
                   ({restaurant.reviewCount})
-                </StyledText>
+                </Text>
               </Stack>
             ) : (
-              <StyledText fontSize={15} color={COLORS.textMuted}>
+              <Text fontSize={15} color={COLORS.textMuted}>
                 New
-              </StyledText>
+              </Text>
             )}
-            <StyledText fontSize={13} color={COLORS.border}>
+            <Text fontSize={13} color={COLORS.border}>
               ·
-            </StyledText>
+            </Text>
             <Stack horizontal alignItems="center" gap={5}>
               <Icon name="tag" size={13} color={COLORS.textMuted} />
-              <StyledText fontSize={15} color={COLORS.textMuted}>
+              <Text fontSize={15} color={COLORS.textMuted}>
                 Min {formatMoney(restaurant.minOrderCents)}
-              </StyledText>
+              </Text>
             </Stack>
           </Stack>
 
           {restaurant.description && (
-            <StyledText
+            <Text
               fontSize={15}
               color={COLORS.textSecondary}
               textAlign="center"
@@ -539,7 +539,7 @@ export default function RestaurantDetailScreen() {
               style={{ maxWidth: "92%" }}
             >
               {restaurant.description}
-            </StyledText>
+            </Text>
           )}
         </Stack>
 
@@ -547,14 +547,13 @@ export default function RestaurantDetailScreen() {
         <Stack gap={12} paddingTop={18} paddingBottom={8}>
           <Stack horizontal alignItems="center" gap={8} paddingHorizontal={24}>
             <Icon name="calendar" size={18} color={COLORS.primary} />
-            <StyledText
-              fontSize={20}
-              fontWeight="700"
+            <Text
+              variant="title"
               color={COLORS.textPrimary}
               style={{ letterSpacing: -0.2 }}
             >
               Delivery slots
-            </StyledText>
+            </Text>
           </Stack>
           {/* Only shown when it's actually relevant, same rule as the web
               settings page — the slots above are already filtered
@@ -573,10 +572,10 @@ export default function RestaurantDetailScreen() {
               padding={14}
             >
               <Icon name="info" size={16} color={COLORS.warning} style={{ marginTop: 1 }} />
-              <StyledText fontSize={12.5} color={COLORS.textSecondary} lineHeight={18} style={{ flex: 1 }}>
+              <Text fontSize={12.5} color={COLORS.textSecondary} lineHeight={18} style={{ flex: 1 }}>
                 This restaurant requires at least {restaurant.minimumLeadTimeDays} day
                 {restaurant.minimumLeadTimeDays === 1 ? "" : "s"}&apos; notice.
-              </StyledText>
+              </Text>
             </Stack>
           )}
           <ScrollView
@@ -619,13 +618,13 @@ export default function RestaurantDetailScreen() {
             )}
           </ScrollView>
           {cart.selectedSlot && (
-            <StyledText
+            <Text
               fontSize={12.5}
               color={COLORS.textMuted}
               paddingHorizontal={24}
             >
               Delivery slot selected — you can change it at checkout too.
-            </StyledText>
+            </Text>
           )}
         </Stack>
 
@@ -637,14 +636,13 @@ export default function RestaurantDetailScreen() {
               size={18}
               color={COLORS.primary}
             />
-            <StyledText
-              fontSize={20}
-              fontWeight="700"
+            <Text
+              variant="title"
               color={COLORS.textPrimary}
               style={{ letterSpacing: -0.2 }}
             >
               Menu
-            </StyledText>
+            </Text>
           </Stack>
           {restaurant.menuItems.map((item) => (
             <MenuCard

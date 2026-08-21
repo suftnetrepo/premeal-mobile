@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Dimensions, Keyboard, Platform, ScrollView, TextInput } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { Stack, StyledText, StyledPressable, StyledShape, StyledBadge, StyledSpacer, Popup, toastService, Spinner } from "fluent-styles";
+import { Stack, StyledPressable, StyledShape, StyledBadge, StyledSpacer, Popup, toastService, Spinner } from "fluent-styles";
+import { Text } from "./text";
 import { useAddresses } from "../hooks/useAddresses";
 import { useAddressSuggestions } from "../hooks/useGeocode";
 import { locationFromAddress, type ActiveLocation } from "../location/LocationContext";
@@ -70,9 +71,9 @@ function AddressRow({ addr, active, onSelect }: { addr: Address; active: boolean
       </StyledShape>
       <Stack flex={1} gap={2}>
         <Stack horizontal alignItems="center" gap={8}>
-          <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+          <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
             {addr.label ?? "Address"}
-          </StyledText>
+          </Text>
           {addr.isDefault && (
             <StyledBadge
               backgroundColor={COLORS.primaryLight}
@@ -87,9 +88,9 @@ function AddressRow({ addr, active, onSelect }: { addr: Address; active: boolean
             </StyledBadge>
           )}
         </Stack>
-        <StyledText fontSize={12} color={COLORS.textMuted} numberOfLines={1}>
+        <Text variant="bodySmall" color={COLORS.textMuted} numberOfLines={1}>
           {addr.address}
-        </StyledText>
+        </Text>
       </Stack>
       {active && <Icon name="check-circle" size={20} color={COLORS.primary} />}
     </StyledPressable>
@@ -166,9 +167,9 @@ export function AddressPickerPopup({
           {(!addresses || addresses.length === 0) && (
             <Stack alignItems="center" paddingVertical={16} gap={6}>
               <Icon name="map-pin" size={28} color={COLORS.border} />
-              <StyledText fontSize={14} color={COLORS.textMuted} textAlign="center">
+              <Text variant="body" color={COLORS.textMuted} textAlign="center">
                 No saved addresses yet.
-              </StyledText>
+              </Text>
             </Stack>
           )}
 
@@ -188,14 +189,14 @@ export function AddressPickerPopup({
             <StyledShape size={36} cycle borderRadius={10} backgroundColor={COLORS.primary}>
               <Icon name="plus" size={18} color="#FFFFFF" />
             </StyledShape>
-            <StyledText fontSize={14} fontWeight="700" color={COLORS.primary}>
+            <Text fontSize={14} fontWeight="700" color={COLORS.primary}>
               Add a new address
-            </StyledText>
+            </Text>
           </StyledPressable>
 
           {__DEV__ && (
             <StyledPressable onPress={resetOnboarding} alignItems="center" paddingTop={12}>
-              <StyledText fontSize={11} color={COLORS.textMuted}>🛠 Reset onboarding (dev only)</StyledText>
+              <Text variant="caption" color={COLORS.textMuted}>🛠 Reset onboarding (dev only)</Text>
             </StyledPressable>
           )}
         </Stack>
@@ -204,7 +205,7 @@ export function AddressPickerPopup({
           {(addresses ?? []).length > 0 && (
             <StyledPressable onPress={() => { setAddingNew(false); setQuery(""); }} flexDirection="row" alignItems="center" gap={6} alignSelf="flex-start">
               <Icon name="arrow-left" size={15} color={COLORS.primary} />
-              <StyledText fontSize={13} fontWeight="600" color={COLORS.primary}>Back to saved</StyledText>
+              <Text fontSize={13} fontWeight="600" color={COLORS.primary}>Back to saved</Text>
             </StyledPressable>
           )}
 
@@ -255,9 +256,9 @@ export function AddressPickerPopup({
                     borderBottomColor={COLORS.border}
                   >
                     <Icon name="map-pin" size={14} color={COLORS.primary} />
-                    <StyledText fontSize={14} color={COLORS.textPrimary} flex={1}>
+                    <Text variant="body" color={COLORS.textPrimary} flex={1}>
                       {s.formattedAddress}
-                    </StyledText>
+                    </Text>
                   </StyledPressable>
                 ))}
               </Stack>
@@ -265,9 +266,9 @@ export function AddressPickerPopup({
           )}
 
           {query.trim().length >= 3 && !suggestionsLoading && !suggestions?.length && (
-            <StyledText fontSize={14} color={COLORS.textMuted} textAlign="center">
+            <Text variant="body" color={COLORS.textMuted} textAlign="center">
               No addresses found — try a different search.
-            </StyledText>
+            </Text>
           )}
         </Stack>
       )}

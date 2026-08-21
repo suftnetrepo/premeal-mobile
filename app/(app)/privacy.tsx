@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape } from "fluent-styles";
+import { StyledPage, Stack, StyledShape } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { COLORS } from "../../src/theme/colors";
 import { ScalePressable, SHADOW_SOFT, SHADOW_CARD } from "../../src/lib/animations";
 
@@ -20,9 +21,9 @@ function InfoCard({
         <StyledShape size={40} cycle backgroundColor={COLORS.primaryLight}>
           <Icon name={icon as any} size={17} color={COLORS.primary} />
         </StyledShape>
-        <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flex: 1 }}>
+        <Text fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flex: 1 }}>
           {title}
-        </StyledText>
+        </Text>
       </Stack>
       <Stack gap={8}>{children}</Stack>
     </Stack>
@@ -31,21 +32,21 @@ function InfoCard({
 
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={20}>
+    <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={20}>
       {children}
-    </StyledText>
+    </Text>
   );
 }
 
 function Bullet({ children }: { children: React.ReactNode }) {
   return (
     <Stack horizontal gap={8} alignItems="flex-start">
-      <StyledText fontSize={13.5} color={COLORS.textMuted}>
+      <Text fontSize={13.5} color={COLORS.textMuted}>
         •
-      </StyledText>
-      <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={20} style={{ flex: 1 }}>
+      </Text>
+      <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={20} style={{ flex: 1 }}>
         {children}
-      </StyledText>
+      </Text>
     </Stack>
   );
 }
@@ -60,9 +61,9 @@ export default function PrivacyScreen() {
               <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
             </Stack>
           </ScalePressable>
-          <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
             Privacy & Security
-          </StyledText>
+          </Text>
           <Stack width={40} height={40} />
         </Stack>
       </StyledPage.Header.Full>
@@ -79,10 +80,10 @@ export default function PrivacyScreen() {
             padding={16}
           >
             <Icon name="info" size={16} color={COLORS.warning} style={{ marginTop: 1 }} />
-            <StyledText fontSize={12.5} color={COLORS.textSecondary} lineHeight={18} style={{ flex: 1 }}>
+            <Text fontSize={12.5} color={COLORS.textSecondary} lineHeight={18} style={{ flex: 1 }}>
               This page is a plain-language summary for information only — it isn't a substitute for
               Pre-Meal's formal Terms of Service and Privacy Policy, and it isn't legal advice.
-            </StyledText>
+            </Text>
           </Stack>
 
           <InfoCard icon="credit-card" title="Payments">

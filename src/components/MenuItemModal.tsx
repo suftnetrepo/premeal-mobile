@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Popup, Stack, StyledText, StyledPressable, StyledCheckBox, theme } from "fluent-styles";
+import { Popup, Stack, StyledPressable, StyledCheckBox, theme } from "fluent-styles";
+import { Text } from "./text";
 import type { MenuItem, ModifierGroup } from "../api/types";
 import { formatMoney } from "../lib/format";
 import { computeUnitPriceCents, invalidGroups } from "../cart/cart-utils";
@@ -54,9 +55,9 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
       <ScrollView style={{ maxHeight: 420 }} showsVerticalScrollIndicator={false}>
         <Stack paddingHorizontal={20} paddingTop={4} paddingBottom={20} gap={22}>
           {menuItem.description && (
-            <StyledText fontSize={14} lineHeight={20} color={COLORS.textMuted}>
+            <Text variant="body" lineHeight={20} color={COLORS.textMuted}>
               {menuItem.description}
-            </StyledText>
+            </Text>
           )}
 
           {groups.map((group) => (
@@ -67,16 +68,16 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
                 justifyContent="space-between"
                 paddingBottom={8}
               >
-                <StyledText fontSize={16} fontWeight="700" color={COLORS.textPrimary}>
+                <Text fontSize={16} fontWeight="700" color={COLORS.textPrimary}>
                   {group.name}
-                </StyledText>
+                </Text>
                 <Stack
                   paddingHorizontal={10}
                   paddingVertical={4}
                   borderRadius={999}
                   backgroundColor={group.minSelect > 0 ? COLORS.primaryLight : COLORS.bgMuted}
                 >
-                  <StyledText
+                  <Text
                     fontSize={11}
                     fontWeight="700"
                     color={group.minSelect > 0 ? COLORS.primary : COLORS.textMuted}
@@ -86,7 +87,7 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
                         ? `Required · ${group.minSelect}`
                         : `Required · ${group.minSelect}-${group.maxSelect}`
                       : "Optional"}
-                  </StyledText>
+                  </Text>
                 </Stack>
               </Stack>
 
@@ -109,16 +110,16 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
                         checkedColor={COLORS.primary}
                         checkMarkColor={theme.colors.gray[1]}
                       />
-                      <StyledText fontSize={14} color={COLORS.textPrimary} flex={1}>
+                      <Text variant="body" color={COLORS.textPrimary} flex={1}>
                         {opt.name}
                         {!opt.isAvailable ? " (unavailable)" : ""}
-                      </StyledText>
+                      </Text>
                     </Stack>
                     {opt.priceDeltaCents !== 0 && (
-                      <StyledText fontSize={14} color={COLORS.textMuted}>
+                      <Text variant="body" color={COLORS.textMuted}>
                         {opt.priceDeltaCents > 0 ? "+" : "-"}
                         {formatMoney(Math.abs(opt.priceDeltaCents))}
-                      </StyledText>
+                      </Text>
                     )}
                   </StyledPressable>
                 );
@@ -145,13 +146,13 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
             justifyContent="center"
             backgroundColor={COLORS.bgMuted}
           >
-            <StyledText fontSize={18} fontWeight="700" color={COLORS.textPrimary}>
+            <Text fontSize={18} fontWeight="700" color={COLORS.textPrimary}>
               −
-            </StyledText>
+            </Text>
           </StyledPressable>
-          <StyledText fontSize={16} fontWeight="700" color={COLORS.textPrimary}>
+          <Text fontSize={16} fontWeight="700" color={COLORS.textPrimary}>
             {quantity}
-          </StyledText>
+          </Text>
           <StyledPressable
             onPress={() => setQuantity((q) => q + 1)}
             width={36}
@@ -161,9 +162,9 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
             justifyContent="center"
             backgroundColor={COLORS.bgMuted}
           >
-            <StyledText fontSize={18} fontWeight="700" color={COLORS.textPrimary}>
+            <Text fontSize={18} fontWeight="700" color={COLORS.textPrimary}>
               +
-            </StyledText>
+            </Text>
           </StyledPressable>
         </Stack>
 
@@ -178,12 +179,12 @@ export function MenuItemModal({ visible, menuItem, onClose, onAdd }: Props) {
           borderRadius={999}
           backgroundColor={canAdd ? COLORS.primary : COLORS.bgMuted}
         >
-          <StyledText fontSize={15} fontWeight="700" color={canAdd ? COLORS.white : COLORS.textMuted}>
+          <Text fontSize={15} fontWeight="700" color={canAdd ? COLORS.white : COLORS.textMuted}>
             {canAdd ? "Add" : `Select ${missing[0]?.name ?? "options"}`}
-          </StyledText>
-          <StyledText fontSize={15} fontWeight="700" color={canAdd ? COLORS.white : COLORS.textMuted}>
+          </Text>
+          <Text fontSize={15} fontWeight="700" color={canAdd ? COLORS.white : COLORS.textMuted}>
             {formatMoney(totalCents)}
-          </StyledText>
+          </Text>
         </StyledPressable>
       </Stack>
     </Popup>

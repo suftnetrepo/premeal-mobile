@@ -2,7 +2,8 @@ import { router } from "expo-router";
 import Constants from "expo-constants";
 import { ScrollView } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape } from "fluent-styles";
+import { StyledPage, Stack, StyledShape } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { COLORS } from "../../src/theme/colors";
 import { ScalePressable, SHADOW_SOFT, SHADOW_CARD } from "../../src/lib/animations";
 
@@ -38,12 +39,12 @@ function InfoRow({ icon, title, body }: { icon: string; title: string; body: str
         <Icon name={icon as any} size={19} color={COLORS.primary} />
       </StyledShape>
       <Stack flex={1} gap={3}>
-        <StyledText fontSize={14.5} fontWeight="800" color={COLORS.textPrimary}>
+        <Text fontSize={14.5} fontWeight="800" color={COLORS.textPrimary}>
           {title}
-        </StyledText>
-        <StyledText fontSize={13} color={COLORS.textSecondary} lineHeight={19}>
+        </Text>
+        <Text fontSize={13} color={COLORS.textSecondary} lineHeight={19}>
           {body}
-        </StyledText>
+        </Text>
       </Stack>
     </Stack>
   );
@@ -61,9 +62,9 @@ export default function AboutScreen() {
               <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
             </Stack>
           </ScalePressable>
-          <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
             About
-          </StyledText>
+          </Text>
           <Stack width={40} height={40} />
         </Stack>
       </StyledPage.Header.Full>
@@ -71,24 +72,24 @@ export default function AboutScreen() {
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
         <Stack gap={20}>
           <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={8} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-            <StyledText fontSize={11} fontWeight="800" color={COLORS.primary} style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
+            <Text fontSize={11} fontWeight="800" color={COLORS.primary} style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
               Pre-Meal
-            </StyledText>
-            <StyledText fontSize={24} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
+            </Text>
+            <Text fontSize={24} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
               Food, on your schedule.
-            </StyledText>
-            <StyledText fontSize={14} color={COLORS.textSecondary} lineHeight={21}>
+            </Text>
+            <Text variant="body" color={COLORS.textSecondary} lineHeight={21}>
               Most delivery apps optimise for speed right now — but not every order needs to arrive in 20
               minutes. Pre-Meal is built for the times you already know exactly when you want to eat: order
               ahead, pick a delivery window, and the restaurant confirms within 30 minutes so they can cook
               for a real, scheduled order rather than rushing one out the door.
-            </StyledText>
+            </Text>
           </Stack>
 
           <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={20} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-            <StyledText fontSize={12.5} fontWeight="700" color={COLORS.textMuted} style={{ textTransform: "uppercase", letterSpacing: 0.6 }}>
+            <Text fontSize={12.5} fontWeight="700" color={COLORS.textMuted} style={{ textTransform: "uppercase", letterSpacing: 0.6 }}>
               How it works
-            </StyledText>
+            </Text>
             {HOW_IT_WORKS.map((item) => (
               <InfoRow key={item.title} {...item} />
             ))}
@@ -97,23 +98,23 @@ export default function AboutScreen() {
           <Stack backgroundColor={COLORS.primaryLight} borderRadius={22} padding={18} horizontal gap={12} alignItems="flex-start">
             <Icon name="clock" size={17} color={COLORS.primary} style={{ marginTop: 1 }} />
             <Stack flex={1} gap={3}>
-              <StyledText fontSize={13.5} fontWeight="800" color={COLORS.textPrimary}>
+              <Text fontSize={13.5} fontWeight="800" color={COLORS.textPrimary}>
                 Pre-Meal+ — coming later
-              </StyledText>
-              <StyledText fontSize={12.5} color={COLORS.textSecondary} lineHeight={18}>
+              </Text>
+              <Text fontSize={12.5} color={COLORS.textSecondary} lineHeight={18}>
                 A subscription plan (free delivery and a discount on every order) is built into Pre-Meal but
                 isn't switched on yet — it isn't something you can sign up for today.
-              </StyledText>
+              </Text>
             </Stack>
           </Stack>
 
           <Stack alignItems="center" gap={2} paddingTop={8}>
-            <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+            <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
               Pre-Meal
-            </StyledText>
-            <StyledText fontSize={12} color={COLORS.textMuted}>
+            </Text>
+            <Text variant="bodySmall" color={COLORS.textMuted}>
               Version {version}
-            </StyledText>
+            </Text>
           </Stack>
         </Stack>
       </ScrollView>

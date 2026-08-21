@@ -12,7 +12,6 @@ import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
 import {
   StyledPage,
-  StyledText,
   StyledPressable,
   StyledShape,
   Stack,
@@ -21,6 +20,7 @@ import {
   StyledImageBackground,
   Loader,
 } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useLocation } from "../../src/location/LocationContext";
 import { useRestaurants } from "../../src/hooks/useRestaurants";
 import { useCart } from "../../src/cart/CartContext";
@@ -234,16 +234,16 @@ function CuisineChip({
             active ? "rgba(255,255,255,0.22)" : COLORS.primaryLight
           }
         >
-          <StyledText fontSize={20}>{emoji}</StyledText>
+          <Text fontSize={20}>{emoji}</Text>
         </StyledShape>
-        <StyledText
+        <Text
           fontSize={11.5}
           fontWeight={active ? "800" : "600"}
           color={active ? "#FFFFFF" : COLORS.textSecondary}
           numberOfLines={1}
         >
           {label}
-        </StyledText>
+        </Text>
       </Stack>
     </ScalePressable>
   );
@@ -336,20 +336,20 @@ function RestaurantCard({
             alignSelf="flex-end" 
           >
             <Icon name="clock" size={11} color={COLORS.textPrimary} />
-            <StyledText
+            <Text
               fontSize={11}
               fontWeight="700"
               color={COLORS.textPrimary}
             >
               Slots open
-            </StyledText>
+            </Text>
           </Stack>
         </StyledImageBackground>
 
         {/* Info */}
         <Stack padding={18} gap={8}>
           <Stack horizontal alignItems="center" justifyContent="space-between">
-            <StyledText
+            <Text
               fontSize={19}
               fontWeight="800"
               color={COLORS.textPrimary}
@@ -357,38 +357,38 @@ function RestaurantCard({
               style={{ letterSpacing: -0.3 }}
             >
               {item.name}
-            </StyledText>
+            </Text>
 
             {item.distanceKm != null && (
               <>
-                <StyledText fontSize={12} color={COLORS.border}>
+                <Text variant="bodySmall" color={COLORS.border}>
                   ·
-                </StyledText>
-                <StyledText fontSize={13} color={COLORS.textMuted}>
+                </Text>
+                <Text fontSize={13} color={COLORS.textMuted}>
                   {`${kmToMiles(item.distanceKm).toFixed(1)} mi`}
-                </StyledText>
+                </Text>
               </>
             )}
           </Stack>
 
           <Stack horizontal alignItems="center" gap={6} flexWrap="wrap">
-            <StyledText fontSize={13} color={COLORS.textMuted}>
+            <Text fontSize={13} color={COLORS.textMuted}>
               {item.cuisine}
-            </StyledText>
+            </Text>
 
             {item.averageRating !== null && (
               <Stack horizontal alignItems="center" gap={3} marginLeft={2}>
                 <Icon name="star" size={12} color="#F59E0B" />
-                <StyledText
+                <Text
                   fontSize={13}
                   fontWeight="700"
                   color={COLORS.textPrimary}
                 >
                   {item.averageRating.toFixed(1)}
-                </StyledText>
-                <StyledText fontSize={12} color={COLORS.textMuted}>
+                </Text>
+                <Text variant="bodySmall" color={COLORS.textMuted}>
                   ({item.reviewCount}+)
-                </StyledText>
+                </Text>
               </Stack>
             )}
           </Stack>
@@ -400,26 +400,26 @@ function RestaurantCard({
             marginTop={1}
           >
             {item.deliveryFeeCents === 0 ? (
-              <StyledText
+              <Text
                 fontSize={13.5}
                 fontWeight="700"
                 color={COLORS.primary}
               >
                 Free delivery
-              </StyledText>
+              </Text>
             ) : (
               <Stack horizontal alignItems="center" gap={5}>
-                <StyledText fontSize={13}>🚴</StyledText>
-                <StyledText fontSize={13} color={COLORS.textMuted}>
+                <Text fontSize={13}>🚴</Text>
+                <Text fontSize={13} color={COLORS.textMuted}>
                   Delivery
-                </StyledText>
-                <StyledText
+                </Text>
+                <Text
                   fontSize={13.5}
                   fontWeight="700"
                   color={COLORS.primary}
                 >
                   {formatMoney(item.deliveryFeeCents)}
-                </StyledText>
+                </Text>
               </Stack>
             )}
             <Stack
@@ -435,11 +435,11 @@ function RestaurantCard({
                 elevation: 2,
               }}
             >
-              <StyledText fontSize={12} fontWeight="700" color="#FFFFFF">
+              <Text fontSize={12} fontWeight="700" color="#FFFFFF">
                 {item.minOrderCents === 0
                   ? "No min."
                   : `Min ${formatMoney(item.minOrderCents)}`}
-              </StyledText>
+              </Text>
             </Stack>
           </Stack>
         </Stack>
@@ -479,14 +479,14 @@ export default function ResultsScreen() {
         justifyContent="center"
         padding={24}
       >
-        <StyledText
+        <Text
           fontSize={15}
           color={COLORS.textMuted}
           textAlign="center"
           marginBottom={16}
         >
           Set a delivery address to see restaurants.
-        </StyledText>
+        </Text>
         <StyledPressable
           onPress={() => router.replace("/")}
           backgroundColor={COLORS.primary}
@@ -494,9 +494,9 @@ export default function ResultsScreen() {
           paddingHorizontal={20}
           paddingVertical={12}
         >
-          <StyledText fontSize={14} fontWeight="700" color="#FFFFFF">
+          <Text variant="button" color="#FFFFFF">
             Set address
-          </StyledText>
+          </Text>
         </StyledPressable>
       </StyledPage>
     );
@@ -531,7 +531,7 @@ export default function ResultsScreen() {
                 </StyledShape>
               </Stack>
               <Stack gap={2} flex={1}>
-                <StyledText
+                <Text
                   fontSize={10.5}
                   fontWeight="300"
                   paddingLeft={3}
@@ -540,7 +540,7 @@ export default function ResultsScreen() {
                   textTransform="uppercase"
                 >
                   Delivering to
-                </StyledText>
+                </Text>
                 <StyledPressable
                   onPress={() => setPickerOpen(true)}
                   flexDirection="row"
@@ -552,7 +552,7 @@ export default function ResultsScreen() {
                     size={14}
                     color={COLORS.primary}
                   />
-                  <StyledText
+                  <Text
                     fontSize={18}
                     fontWeight="800"
                     color={COLORS.textPrimary}
@@ -563,7 +563,7 @@ export default function ResultsScreen() {
                     }}
                   >
                     {pillLabel}
-                  </StyledText>
+                  </Text>
                   <Icon name="chevron-down" size={15} color={COLORS.primary} />
                 </StyledPressable>
               </Stack>
@@ -597,9 +597,9 @@ export default function ResultsScreen() {
               style={SHADOW_SOFT}
             >
               <Icon name="search" size={16} color={COLORS.textMuted} />
-              <StyledText fontSize={13.5} color={COLORS.textMuted} flex={1}>
+              <Text fontSize={13.5} color={COLORS.textMuted} flex={1}>
                 Search by address…
-              </StyledText>
+              </Text>
               <Stack
                 width={1}
                 height={20}
@@ -663,9 +663,9 @@ export default function ResultsScreen() {
             borderRadius={18}
             backgroundColor={COLORS.errorLight}
           >
-            <StyledText fontSize={14} color={COLORS.error}>
+            <Text variant="body" color={COLORS.error}>
               Could not load restaurants. Check your connection.
-            </StyledText>
+            </Text>
           </Stack>
         )}
 
@@ -680,15 +680,15 @@ export default function ResultsScreen() {
             <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
               <Icon name="map-pin" size={34} color={COLORS.primary} />
             </StyledShape>
-            <StyledText
+            <Text
               fontSize={17}
               fontWeight="800"
               color={COLORS.textPrimary}
               textAlign="center"
             >
               No restaurants deliver here yet
-            </StyledText>
-            <StyledText
+            </Text>
+            <Text
               fontSize={13.5}
               color={COLORS.textMuted}
               textAlign="center"
@@ -696,7 +696,7 @@ export default function ResultsScreen() {
             >
               We don't have partners that cover this area. Try a nearby town or
               city.
-            </StyledText>
+            </Text>
             <ScalePressable onPress={() => setPickerOpen(true)}>
               <Stack
                 backgroundColor={COLORS.primary}
@@ -706,9 +706,9 @@ export default function ResultsScreen() {
                 marginTop={4}
                 style={SHADOW_CTA_CHIP}
               >
-                <StyledText fontSize={13.5} fontWeight="700" color="#FFFFFF">
+                <Text fontSize={13.5} fontWeight="700" color="#FFFFFF">
                   Try a different address
-                </StyledText>
+                </Text>
               </Stack>
             </ScalePressable>
           </Stack>
@@ -725,17 +725,17 @@ export default function ResultsScreen() {
                 alignItems="center"
                 horizontal
               >
-                <StyledText
+                <Text
                   fontSize={21}
                   fontWeight="800"
                   color={COLORS.textPrimary}
                   style={{ letterSpacing: -0.3 }}
                 >
                   {cuisineFilter ? `${cuisineFilter} near you` : "🔥 Near You"}
-                </StyledText>
-                <StyledText fontSize={13} color={COLORS.textMuted}>
+                </Text>
+                <Text fontSize={13} color={COLORS.textMuted}>
                   {filtered.length} place{filtered.length === 1 ? "" : "s"}{" "}
-                </StyledText>
+                </Text>
               </Stack>
               {filtered.map((item) => (
                 <RestaurantCard
@@ -755,21 +755,21 @@ export default function ResultsScreen() {
           filtered.length === 0 &&
           (restaurants ?? []).length > 0 && (
             <Stack alignItems="center" paddingVertical={40} gap={10}>
-              <StyledText
-                fontSize={14}
+              <Text
+                variant="body"
                 color={COLORS.textMuted}
                 textAlign="center"
               >
                 No {cuisineFilter} restaurants deliver here yet.
-              </StyledText>
+              </Text>
               <StyledPressable onPress={() => setCuisineFilter(null)}>
-                <StyledText
+                <Text
                   fontSize={13}
                   fontWeight="700"
                   color={COLORS.primary}
                 >
                   Browse all cuisines
-                </StyledText>
+                </Text>
               </StyledPressable>
             </Stack>
           )}

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Animated, RefreshControl, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Feather as Icon } from "@expo/vector-icons";
-import { StyledPage, Stack, StyledText, StyledShape, Loader } from "fluent-styles";
+import { StyledPage, Stack, StyledShape, Loader } from "fluent-styles";
+import { Text } from "../../../src/components/text";
 import { useMyOrders } from "../../../src/hooks/useOrders";
 import { formatMoney, formatDate } from "../../../src/lib/format";
 import { COLORS } from "../../../src/theme/colors";
@@ -48,9 +49,9 @@ function FilterChips({ value, onChange }: { value: FilterValue; onChange: (v: Fi
               backgroundColor={active ? "#1C1917" : "#FFFFFF"}
               style={SHADOW_SOFT}
             >
-              <StyledText fontSize={13} fontWeight="700" color={active ? "#FFFFFF" : COLORS.textSecondary}>
+              <Text fontSize={13} fontWeight="700" color={active ? "#FFFFFF" : COLORS.textSecondary}>
                 {f.label}
-              </StyledText>
+              </Text>
             </Stack>
           </ScalePressable>
         );
@@ -72,20 +73,20 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
             <Icon name="shopping-bag" size={21} color={COLORS.primary} />
           </StyledShape>
           <Stack flex={1} gap={4}>
-            <StyledText fontSize={16.5} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.2 }}>
+            <Text fontSize={16.5} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.2 }}>
               {order.restaurant.name}
-            </StyledText>
+            </Text>
             <Stack horizontal alignItems="center" gap={6}>
               <Icon name="clock" size={12} color={COLORS.textMuted} />
-              <StyledText fontSize={12.5} color={COLORS.textMuted}>
+              <Text fontSize={12.5} color={COLORS.textMuted}>
                 {formatDate(order.slot.date)} · {order.slot.windowStart}–{order.slot.windowEnd}
-              </StyledText>
+              </Text>
             </Stack>
           </Stack>
           <Stack backgroundColor={`${statusColor}18`} borderRadius={999} paddingHorizontal={12} paddingVertical={6}>
-            <StyledText fontSize={11.5} fontWeight="700" color={statusColor}>
+            <Text fontSize={11.5} fontWeight="700" color={statusColor}>
               {STATUS_LABEL[order.status]}
-            </StyledText>
+            </Text>
           </Stack>
         </Stack>
 
@@ -96,29 +97,29 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
             <StyledShape size={34} cycle backgroundColor={COLORS.primaryLight}>
               <Icon name="shopping-bag" size={14} color={COLORS.primary} />
             </StyledShape>
-            <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+            <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
               {itemCount} item{itemCount === 1 ? "" : "s"}
-            </StyledText>
+            </Text>
           </Stack>
           <Stack width={1} height={28} backgroundColor={COLORS.border} />
           <Stack horizontal alignItems="center" gap={10} flex={1.4}>
             <StyledShape size={34} cycle backgroundColor={COLORS.primaryLight}>
               <Icon name="map-pin" size={14} color={COLORS.primary} />
             </StyledShape>
-            <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary} numberOfLines={1} style={{ flexShrink: 1 }}>
+            <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary} numberOfLines={1} style={{ flexShrink: 1 }}>
               {order.deliveryAddress}
-            </StyledText>
+            </Text>
           </Stack>
         </Stack>
 
         <Stack horizontal alignItems="center" justifyContent="space-between" marginTop={2}>
-          <StyledText fontSize={19} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
+          <Text fontSize={19} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
             {formatMoney(order.totalCents)}
-          </StyledText>
+          </Text>
           <Stack horizontal alignItems="center" gap={5}>
-            <StyledText fontSize={14} fontWeight="700" color={COLORS.primary}>
+            <Text variant="button" color={COLORS.primary}>
               View order
-            </StyledText>
+            </Text>
             <Icon name="arrow-right" size={15} color={COLORS.primary} />
           </Stack>
         </Stack>
@@ -158,12 +159,12 @@ export default function OrdersScreen() {
             </Stack>
           </ScalePressable>
           <Stack flex={1} alignItems="center" gap={2} paddingHorizontal={8}>
-            <StyledText fontSize={20} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
+            <Text fontSize={20} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.3 }}>
               My orders
-            </StyledText>
-            <StyledText fontSize={12.5} color={COLORS.textMuted}>
+            </Text>
+            <Text fontSize={12.5} color={COLORS.textMuted}>
               Your past orders
-            </StyledText>
+            </Text>
           </Stack>
           <ScalePressable onPress={() => router.push("/account")} toValue={0.88}>
             <Stack width={40} height={40} borderRadius={20} alignItems="center" justifyContent="center" backgroundColor="#FFFFFF" style={SHADOW_SOFT}>
@@ -181,9 +182,9 @@ export default function OrdersScreen() {
 
       {error && (
         <Stack flex={1} alignItems="center" justifyContent="center" padding={24}>
-          <StyledText fontSize={14} color={COLORS.error} textAlign="center">
+          <Text variant="body" color={COLORS.error} textAlign="center">
             Could not load your orders.
-          </StyledText>
+          </Text>
         </Stack>
       )}
 
@@ -206,12 +207,12 @@ export default function OrdersScreen() {
               <StyledShape size={92} cycle backgroundColor={COLORS.primaryLight}>
                 <Icon name="shopping-bag" size={36} color={COLORS.primary} />
               </StyledShape>
-              <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
+              <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
                 No orders yet
-              </StyledText>
-              <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+              </Text>
+              <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
                 Start exploring restaurants and place your first order.
-              </StyledText>
+              </Text>
               <ScalePressable onPress={() => router.replace("/")} toValue={0.96}>
                 <Stack
                   backgroundColor={COLORS.primary}
@@ -221,18 +222,18 @@ export default function OrdersScreen() {
                   marginTop={4}
                   style={SHADOW_CTA}
                 >
-                  <StyledText fontSize={14.5} fontWeight="700" color={COLORS.white}>
+                  <Text fontSize={14.5} fontWeight="700" color={COLORS.white}>
                     Browse restaurants
-                  </StyledText>
+                  </Text>
                 </Stack>
               </ScalePressable>
             </Stack>
           ) : filtered.length === 0 ? (
             <Stack alignItems="center" paddingTop={48} gap={8}>
               <Icon name="inbox" size={28} color={COLORS.border} />
-              <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+              <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
                 No orders match this filter.
-              </StyledText>
+              </Text>
             </Stack>
           ) : (
             <OrderList key={filter} orders={filtered} />

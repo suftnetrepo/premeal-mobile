@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Animated } from "react-native";
 import { router } from "expo-router";
-import { Stack, StyledText, StyledPressable } from "fluent-styles";
+import { Stack, StyledPressable } from "fluent-styles";
+import { Text } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCart } from "../cart/CartContext";
 import { formatMoney } from "../lib/format";
@@ -68,17 +69,17 @@ export function BasketBar() {
             alignItems="center"
             justifyContent="center"
           >
-            <StyledText fontSize={12} fontWeight="800" color={COLORS.white}>
+            <Text fontSize={12} fontWeight="800" color={COLORS.white}>
               {itemCount}
-            </StyledText>
+            </Text>
           </Stack>
-          <StyledText fontSize={15} fontWeight="700" color={COLORS.white}>
+          <Text fontSize={15} fontWeight="700" color={COLORS.white}>
             View basket
-          </StyledText>
+          </Text>
         </Stack>
-        <StyledText fontSize={15} fontWeight="700" color={COLORS.white}>
+        <Text fontSize={15} fontWeight="700" color={COLORS.white}>
           {formatMoney(subtotalCents)}
-        </StyledText>
+        </Text>
       </StyledPressable>
     </Animated.View>
   );

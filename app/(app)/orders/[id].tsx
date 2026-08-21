@@ -7,7 +7,6 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import {
   StyledPage,
   Stack,
-  StyledText,
   StyledShape,
   StyledTextInput,
   StyledPressable,
@@ -17,6 +16,7 @@ import {
   Spinner,
   StyledImage,
 } from "fluent-styles";
+import { Text } from "../../../src/components/text";
 import { useOrder, useCancelOrder, useSubmitReview } from "../../../src/hooks/useOrders";
 import { useRestaurant } from "../../../src/hooks/useRestaurants";
 import { getPaymentActionSecret, completePaymentAction } from "../../../src/api/orders";
@@ -170,21 +170,21 @@ function PaymentActionCard({ orderId, onDone }: { orderId: string; onDone: () =>
           <Icon name="shield" size={22} color={COLORS.warning} />
         </StyledShape>
         <Stack flex={1} gap={3}>
-          <StyledText fontSize={16} fontWeight="800" color={COLORS.warning} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={16} fontWeight="800" color={COLORS.warning} style={{ letterSpacing: -0.2 }}>
             Your bank needs you to verify this payment
-          </StyledText>
+          </Text>
         </Stack>
       </Stack>
 
-      <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
+      <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
         The restaurant has accepted your order — we just need you to confirm the charge with your bank
         before it's fully placed.
-      </StyledText>
+      </Text>
 
       {error && (
-        <StyledText fontSize={12.5} color={COLORS.error} lineHeight={18}>
+        <Text fontSize={12.5} color={COLORS.error} lineHeight={18}>
           {error}
-        </StyledText>
+        </Text>
       )}
 
       <ScalePressable onPress={handleVerify} disabled={verifying} toValue={0.97}>
@@ -195,9 +195,9 @@ function PaymentActionCard({ orderId, onDone }: { orderId: string; onDone: () =>
           borderRadius={999}
           backgroundColor={COLORS.warning}
         >
-          <StyledText fontSize={14.5} fontWeight="700" color="#FFFFFF">
+          <Text fontSize={14.5} fontWeight="700" color="#FFFFFF">
             {verifying ? "Verifying…" : "Verify payment"}
-          </StyledText>
+          </Text>
         </Stack>
       </ScalePressable>
     </Stack>
@@ -278,19 +278,19 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
           <StyledShape size={40} cycle backgroundColor={COLORS.primaryLight}>
             <Ionicons name="star" size={17} color={COLORS.primary} />
           </StyledShape>
-          <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+          <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
             Your review
-          </StyledText>
+          </Text>
         </Stack>
         <StarRow rating={review.rating} size={20} />
         {review.comment && (
-          <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
+          <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
             {review.comment}
-          </StyledText>
+          </Text>
         )}
-        <StyledText fontSize={11.5} color={COLORS.textMuted}>
+        <Text fontSize={11.5} color={COLORS.textMuted}>
           Submitted {formatDate(review.createdAt)}
-        </StyledText>
+        </Text>
       </Stack>
     );
   }
@@ -301,12 +301,12 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
         <StyledShape size={52} cycle backgroundColor="#FFFFFF">
           <Icon name="check" size={24} color={COLORS.success} />
         </StyledShape>
-        <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
+        <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
           Thank you for your review!
-        </StyledText>
-        <StyledText fontSize={13} color={COLORS.textMuted} textAlign="center">
+        </Text>
+        <Text fontSize={13} color={COLORS.textMuted} textAlign="center">
           Your feedback helps other customers.
-        </StyledText>
+        </Text>
       </Stack>
     );
   }
@@ -318,12 +318,12 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
           <Ionicons name="star" size={19} color={COLORS.primary} />
         </StyledShape>
         <Stack flex={1} gap={2}>
-          <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
+          <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
             How was your order?
-          </StyledText>
-          <StyledText fontSize={12.5} color={COLORS.textMuted}>
+          </Text>
+          <Text fontSize={12.5} color={COLORS.textMuted}>
             We'd love to hear about your experience.
-          </StyledText>
+          </Text>
         </Stack>
       </Stack>
 
@@ -343,9 +343,9 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
       />
 
       <Stack gap={10}>
-        <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+        <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
           What did you love?
-        </StyledText>
+        </Text>
         <Stack horizontal flexWrap="wrap" gap={8}>
           {QUICK_CHIPS.map((chip) => {
             const active = chips.includes(chip);
@@ -359,9 +359,9 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
                   borderColor={active ? COLORS.primary : COLORS.border}
                   backgroundColor={active ? COLORS.primaryLight : "#FFFFFF"}
                 >
-                  <StyledText fontSize={12.5} fontWeight="700" color={active ? COLORS.primary : COLORS.textSecondary}>
+                  <Text fontSize={12.5} fontWeight="700" color={active ? COLORS.primary : COLORS.textSecondary}>
                     {chip}
-                  </StyledText>
+                  </Text>
                 </Stack>
               </ScalePressable>
             );
@@ -380,9 +380,9 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
       >
         <Stack horizontal alignItems="center" gap={8}>
           <Icon name="camera" size={16} color={COLORS.textMuted} />
-          <StyledText fontSize={13} fontWeight="600" color={COLORS.textMuted}>
+          <Text fontSize={13} fontWeight="600" color={COLORS.textMuted}>
             Add photos (Coming soon)
-          </StyledText>
+          </Text>
         </Stack>
       </Stack>
 
@@ -410,9 +410,9 @@ function ReviewSection({ orderId, review }: { orderId: string; review: Order["re
           {submitReview.isPending ? (
             <Spinner size={18} color={rating > 0 ? "#FFFFFF" : COLORS.textMuted} />
           ) : (
-            <StyledText fontSize={15.5} fontWeight="700" color={rating > 0 ? "#FFFFFF" : COLORS.textMuted}>
+            <Text fontSize={15.5} fontWeight="700" color={rating > 0 ? "#FFFFFF" : COLORS.textMuted}>
               Submit Review
-            </StyledText>
+            </Text>
           )}
         </Stack>
       </ScalePressable>
@@ -470,9 +470,9 @@ export default function OrderDetailScreen() {
       <StyledPage flex={1} backgroundColor={COLORS.bg} showStatusBar statusBarProps={{ barStyle: "dark-content" }}>
         <OrderHeader title="Order" subtitle={null} onCall={null} />
         <Stack flex={1} alignItems="center" justifyContent="center" padding={24}>
-          <StyledText fontSize={14} color={COLORS.error} textAlign="center">
+          <Text variant="body" color={COLORS.error} textAlign="center">
             Could not load this order.
-          </StyledText>
+          </Text>
         </Stack>
       </StyledPage>
     );
@@ -510,28 +510,28 @@ export default function OrderDetailScreen() {
                     <StatusIcon icon={status.icon} iconSet={status.iconSet} size={24} color={status.color} />
                   </StyledShape>
                   <Stack flex={1} gap={3}>
-                    <StyledText fontSize={18} fontWeight="800" color={status.color} style={{ letterSpacing: -0.2 }}>
+                    <Text fontSize={18} fontWeight="800" color={status.color} style={{ letterSpacing: -0.2 }}>
                       {STATUS_LABEL[order.status] ?? order.status}
-                    </StyledText>
+                    </Text>
                     <Stack horizontal alignItems="center" gap={6}>
                       <Icon name="calendar" size={12} color={COLORS.textMuted} />
-                      <StyledText fontSize={12.5} color={COLORS.textMuted}>
+                      <Text fontSize={12.5} color={COLORS.textMuted}>
                         {formatDate(order.slot.date)} · {order.slot.windowStart}–{order.slot.windowEnd}
-                      </StyledText>
+                      </Text>
                     </Stack>
                   </Stack>
                 </Stack>
 
                 {status.message.length > 0 && (
-                  <StyledText fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
+                  <Text fontSize={13.5} color={COLORS.textSecondary} lineHeight={19}>
                     {status.message}
-                  </StyledText>
+                  </Text>
                 )}
 
                 {order.cancelledByRestaurant && order.restaurantCancelReason && (
-                  <StyledText fontSize={13.5} color={COLORS.error} lineHeight={19}>
+                  <Text fontSize={13.5} color={COLORS.error} lineHeight={19}>
                     {order.restaurantCancelReason}
-                  </StyledText>
+                  </Text>
                 )}
               </Stack>
             </Stack>
@@ -546,7 +546,7 @@ export default function OrderDetailScreen() {
 
               {/* ── Order items ───────────────────────────────────────── */}
               <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-                <StyledText
+                <Text
                   fontSize={12.5}
                   fontWeight="700"
                   color={COLORS.textMuted}
@@ -554,7 +554,7 @@ export default function OrderDetailScreen() {
                   style={{ textTransform: "uppercase", letterSpacing: 0.6 }}
                 >
                   Order items
-                </StyledText>
+                </Text>
                 <Stack gap={16}>
                   {order.items.map((item, i) => (
                     <Stack key={item.id}>
@@ -578,23 +578,23 @@ export default function OrderDetailScreen() {
                         ) : (
                           <Stack flexShrink={0}>
                             <StyledShape size={52} cycle backgroundColor={COLORS.primaryLight}>
-                              <StyledText fontSize={20}>🍽️</StyledText>
+                              <Text fontSize={20}>🍽️</Text>
                             </StyledShape>
                           </Stack>
                         )}
                         <Stack flex={1} gap={2}>
-                          <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
+                          <Text fontSize={15} fontWeight="800" color={COLORS.textPrimary}>
                             {item.quantity}× {item.nameSnapshot}
-                          </StyledText>
+                          </Text>
                           {item.modifiers.length > 0 && (
-                            <StyledText fontSize={12.5} color={COLORS.textMuted}>
+                            <Text fontSize={12.5} color={COLORS.textMuted}>
                               {item.modifiers.map((m) => m.optionName).join(", ")}
-                            </StyledText>
+                            </Text>
                           )}
                         </Stack>
-                        <StyledText fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flexShrink: 0 }}>
+                        <Text fontSize={15} fontWeight="800" color={COLORS.textPrimary} style={{ flexShrink: 0 }}>
                           {formatMoney(item.priceCents * item.quantity)}
-                        </StyledText>
+                        </Text>
                       </Stack>
                     </Stack>
                   ))}
@@ -603,47 +603,47 @@ export default function OrderDetailScreen() {
 
               {/* ── Payment summary ───────────────────────────────────── */}
               <Stack backgroundColor={COLORS.bgCard} borderRadius={26} padding={20} gap={12} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-                <StyledText
+                <Text
                   fontSize={12.5}
                   fontWeight="700"
                   color={COLORS.textMuted}
                   style={{ textTransform: "uppercase", letterSpacing: 0.6 }}
                 >
                   Payment summary
-                </StyledText>
+                </Text>
                 <Stack horizontal justifyContent="space-between">
-                  <StyledText fontSize={14} color={COLORS.textSecondary}>
+                  <Text variant="body" color={COLORS.textSecondary}>
                     Subtotal
-                  </StyledText>
-                  <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+                  </Text>
+                  <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
                     {formatMoney(order.subtotalCents)}
-                  </StyledText>
+                  </Text>
                 </Stack>
                 <Stack horizontal justifyContent="space-between">
-                  <StyledText fontSize={14} color={COLORS.textSecondary}>
+                  <Text variant="body" color={COLORS.textSecondary}>
                     Delivery fee
-                  </StyledText>
-                  <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+                  </Text>
+                  <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
                     {formatMoney(order.deliveryFeeCents)}
-                  </StyledText>
+                  </Text>
                 </Stack>
                 {order.discountCents > 0 && (
                   <Stack horizontal justifyContent="space-between">
-                    <StyledText fontSize={14} color={COLORS.textSecondary}>
+                    <Text variant="body" color={COLORS.textSecondary}>
                       Discount
-                    </StyledText>
-                    <StyledText fontSize={14} fontWeight="700" color={COLORS.success}>
+                    </Text>
+                    <Text fontSize={14} fontWeight="700" color={COLORS.success}>
                       -{formatMoney(order.discountCents)}
-                    </StyledText>
+                    </Text>
                   </Stack>
                 )}
                 <Stack borderTopWidth={1} borderTopColor={COLORS.border} paddingTop={12} horizontal justifyContent="space-between" alignItems="center">
-                  <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
+                  <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
                     Total
-                  </StyledText>
-                  <StyledText fontSize={21} fontWeight="800" color={COLORS.primary} style={{ letterSpacing: -0.3 }}>
+                  </Text>
+                  <Text fontSize={21} fontWeight="800" color={COLORS.primary} style={{ letterSpacing: -0.3 }}>
                     {formatMoney(order.totalCents)}
-                  </StyledText>
+                  </Text>
                 </Stack>
               </Stack>
 
@@ -656,12 +656,12 @@ export default function OrderDetailScreen() {
                   <Icon name="map-pin" size={19} color={COLORS.primary} />
                 </StyledShape>
                 <Stack flex={1} gap={2}>
-                  <StyledText fontSize={11.5} fontWeight="700" color={COLORS.textMuted} style={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  <Text fontSize={11.5} fontWeight="700" color={COLORS.textMuted} style={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
                     Delivery to
-                  </StyledText>
-                  <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+                  </Text>
+                  <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
                     {order.deliveryAddress}
-                  </StyledText>
+                  </Text>
                 </Stack>
               </Stack>
 
@@ -673,12 +673,12 @@ export default function OrderDetailScreen() {
                       <Icon name={a.icon as any} size={17} color={COLORS.primary} />
                     </StyledShape>
                     <Stack flex={1} gap={1}>
-                      <StyledText fontSize={13.5} fontWeight="800" color={COLORS.textPrimary}>
+                      <Text fontSize={13.5} fontWeight="800" color={COLORS.textPrimary}>
                         {a.title}
-                      </StyledText>
-                      <StyledText fontSize={12} color={COLORS.textSecondary}>
+                      </Text>
+                      <Text variant="bodySmall" color={COLORS.textSecondary}>
                         {a.body}
-                      </StyledText>
+                      </Text>
                     </Stack>
                   </Stack>
                 ))}
@@ -701,9 +701,9 @@ export default function OrderDetailScreen() {
                     ) : (
                       <Stack horizontal alignItems="center" gap={8}>
                         <Icon name="trash-2" size={16} color={COLORS.error} />
-                        <StyledText fontSize={15} fontWeight="700" color={COLORS.error}>
+                        <Text fontSize={15} fontWeight="700" color={COLORS.error}>
                           Cancel order
-                        </StyledText>
+                        </Text>
                       </Stack>
                     )}
                   </Stack>
@@ -737,13 +737,13 @@ function OrderHeader({
         </ScalePressable>
 
         <Stack flex={1} alignItems="center" gap={2} paddingHorizontal={8}>
-          <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={17} fontWeight="800" color={COLORS.textPrimary} numberOfLines={1} style={{ letterSpacing: -0.2 }}>
             {title}
-          </StyledText>
+          </Text>
           {subtitle && (
-            <StyledText fontSize={12.5} color={COLORS.textMuted}>
+            <Text fontSize={12.5} color={COLORS.textMuted}>
               {subtitle}
-            </StyledText>
+            </Text>
           )}
         </Stack>
 

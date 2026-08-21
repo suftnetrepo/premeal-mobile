@@ -1,5 +1,6 @@
 import { Feather as Icon } from "@expo/vector-icons";
-import { Stack, StyledText, StyledPressable, StyledImageBackground } from "fluent-styles";
+import { Stack, StyledPressable, StyledImageBackground } from "fluent-styles";
+import { Text } from "./text";
 import { formatMoney } from "../lib/format";
 import { cuisineEmoji } from "../lib/cuisines";
 import { COLORS } from "../theme/colors";
@@ -22,41 +23,41 @@ export function RestaurantCard({ item, onPress }: { item: Restaurant; onPress: (
         // the web homepage and once already on mobile. An honest
         // "no real photo yet" placeholder beats pretending one exists.
         <Stack height={200} backgroundColor={COLORS.primaryLight} alignItems="center" justifyContent="center">
-          <StyledText fontSize={52}>{cuisineEmoji(item.cuisine)}</StyledText>
+          <Text fontSize={52}>{cuisineEmoji(item.cuisine)}</Text>
         </Stack>
       )}
       <Stack paddingTop={12} gap={4}>
-        <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary}>
+        <Text fontSize={17} fontWeight="800" color={COLORS.textPrimary}>
           {item.name}
-        </StyledText>
+        </Text>
         <Stack horizontal alignItems="center" gap={5}>
           {item.averageRating !== null ? (
             <>
               <Icon name="star" size={13} color="#F59E0B" />
-              <StyledText fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
+              <Text fontSize={13} fontWeight="700" color={COLORS.textPrimary}>
                 {item.averageRating.toFixed(1)}
-              </StyledText>
-              <StyledText fontSize={13} color={COLORS.textMuted}>
+              </Text>
+              <Text fontSize={13} color={COLORS.textMuted}>
                 ({item.reviewCount} ratings) · {item.cuisine}
-              </StyledText>
+              </Text>
             </>
           ) : (
-            <StyledText fontSize={13} color={COLORS.textMuted}>New · {item.cuisine}</StyledText>
+            <Text fontSize={13} color={COLORS.textMuted}>New · {item.cuisine}</Text>
           )}
         </Stack>
         <Stack horizontal alignItems="center" gap={8} flexWrap="wrap" marginTop={2}>
           <Stack horizontal alignItems="center" gap={4}>
             <Icon name="truck" size={11} color={COLORS.textMuted} />
-            <StyledText fontSize={12} color={COLORS.textMuted}>
+            <Text variant="bodySmall" color={COLORS.textMuted}>
               {item.deliveryFeeCents === 0 ? "Free delivery" : `${formatMoney(item.deliveryFeeCents)} delivery`}
-            </StyledText>
+            </Text>
           </Stack>
-          <StyledText fontSize={12} color={COLORS.border}>·</StyledText>
+          <Text variant="bodySmall" color={COLORS.border}>·</Text>
           <Stack horizontal alignItems="center" gap={4}>
             <Icon name="shopping-cart" size={11} color={COLORS.textMuted} />
-            <StyledText fontSize={12} color={COLORS.textMuted}>
+            <Text variant="bodySmall" color={COLORS.textMuted}>
               {item.minOrderCents === 0 ? "No min. order" : `Min. ${formatMoney(item.minOrderCents)}`}
-            </StyledText>
+            </Text>
           </Stack>
         </Stack>
       </Stack>

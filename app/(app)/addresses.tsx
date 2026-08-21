@@ -5,7 +5,6 @@ import { Feather as Icon } from "@expo/vector-icons";
 import {
   StyledPage,
   Stack,
-  StyledText,
   StyledShape,
   StyledBadge,
   StyledTextInput,
@@ -14,6 +13,7 @@ import {
   Loader,
   Spinner,
 } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import {
   useAddresses,
   useCreateAddress,
@@ -77,9 +77,9 @@ function AddressCard({
 
       <Stack flex={1} gap={3}>
         <Stack horizontal alignItems="center" gap={8}>
-          <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+          <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
             {addr.label ?? "Address"}
-          </StyledText>
+          </Text>
           {addr.isDefault && (
             <StyledBadge
               backgroundColor={COLORS.primaryLight}
@@ -94,9 +94,9 @@ function AddressCard({
             </StyledBadge>
           )}
         </Stack>
-        <StyledText fontSize={13} color={COLORS.textMuted} numberOfLines={2}>
+        <Text fontSize={13} color={COLORS.textMuted} numberOfLines={2}>
           {addr.address}
-        </StyledText>
+        </Text>
       </Stack>
 
       <ScalePressable onPress={openMenu} toValue={0.85}>
@@ -122,13 +122,13 @@ function SuggestionRow({ s, onPress }: { s: GeocodeSuggestion; onPress: () => vo
           <Icon name="map-pin" size={16} color={COLORS.textMuted} />
         </StyledShape>
         <Stack flex={1} gap={2}>
-          <StyledText fontSize={14.5} fontWeight="700" color={COLORS.textPrimary} numberOfLines={1}>
+          <Text fontSize={14.5} fontWeight="700" color={COLORS.textPrimary} numberOfLines={1}>
             {main}
-          </StyledText>
+          </Text>
           {secondary.length > 0 && (
-            <StyledText fontSize={12.5} color={COLORS.textMuted} numberOfLines={1}>
+            <Text fontSize={12.5} color={COLORS.textMuted} numberOfLines={1}>
               {secondary}
-            </StyledText>
+            </Text>
           )}
         </Stack>
       </Stack>
@@ -201,9 +201,9 @@ export default function AddressesScreen() {
                 <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
               </Stack>
             </ScalePressable>
-            <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+            <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
               Addresses
-            </StyledText>
+            </Text>
             <ScalePressable onPress={() => searchRef.current?.focus()} toValue={0.88}>
               <Stack
                 width={40}
@@ -218,9 +218,9 @@ export default function AddressesScreen() {
               </Stack>
             </ScalePressable>
           </Stack>
-          <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+          <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
             Choose a delivery address
-          </StyledText>
+          </Text>
         </Stack>
       </StyledPage.Header.Full>
 
@@ -258,9 +258,9 @@ export default function AddressesScreen() {
             )}
 
             {!suggestionsLoading && !hasSuggestions && (
-              <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center" paddingVertical={12}>
+              <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center" paddingVertical={12}>
                 No addresses found — try a different search.
-              </StyledText>
+              </Text>
             )}
           </Stack>
         )}
@@ -273,7 +273,7 @@ export default function AddressesScreen() {
           <Animated.View style={listAnim}>
             {hasAddresses ? (
               <Stack marginTop={24}>
-                <StyledText
+                <Text
                   fontSize={13}
                   fontWeight="700"
                   color={COLORS.textMuted}
@@ -281,7 +281,7 @@ export default function AddressesScreen() {
                   style={{ textTransform: "uppercase", letterSpacing: 0.5 }}
                 >
                   Saved addresses
-                </StyledText>
+                </Text>
                 {addresses!.map((addr) => (
                   <AddressCard
                     key={addr.id}
@@ -297,12 +297,12 @@ export default function AddressesScreen() {
                   <StyledShape size={88} cycle backgroundColor={COLORS.primaryLight}>
                     <Icon name="map-pin" size={34} color={COLORS.primary} />
                   </StyledShape>
-                  <StyledText fontSize={17} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
+                  <Text fontSize={17} fontWeight="800" color={COLORS.textPrimary} textAlign="center">
                     No saved addresses
-                  </StyledText>
-                  <StyledText fontSize={13.5} color={COLORS.textMuted} textAlign="center">
+                  </Text>
+                  <Text fontSize={13.5} color={COLORS.textMuted} textAlign="center">
                     Search above or add your first delivery address.
-                  </StyledText>
+                  </Text>
                 </Stack>
               )
             )}
@@ -324,9 +324,9 @@ export default function AddressesScreen() {
             ) : (
               <Stack horizontal alignItems="center" gap={8}>
                 <Icon name="plus" size={17} color={query.trim() ? COLORS.white : COLORS.textMuted} />
-                <StyledText fontSize={15.5} fontWeight="700" color={query.trim() ? COLORS.white : COLORS.textMuted}>
+                <Text fontSize={15.5} fontWeight="700" color={query.trim() ? COLORS.white : COLORS.textMuted}>
                   Add address manually
-                </StyledText>
+                </Text>
               </Stack>
             )}
           </Stack>

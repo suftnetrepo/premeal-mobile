@@ -8,7 +8,6 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import {
   StyledPage,
   Stack,
-  StyledText,
   StyledPressable,
   StyledTextInput,
   StyledShape,
@@ -16,6 +15,7 @@ import {
   toastService,
   Spinner,
 } from "fluent-styles";
+import { Text } from "../../src/components/text";
 import { useCart } from "../../src/cart/CartContext";
 import { ESTIMATED_DELIVERY_FEE_CENTS } from "../../src/cart/cart-utils";
 import { useAddresses } from "../../src/hooks/useAddresses";
@@ -171,9 +171,9 @@ export default function CheckoutScreen() {
       <StyledPage flex={1} backgroundColor={COLORS.bg} showStatusBar statusBarProps={{ barStyle: "dark-content" }}>
         <CheckoutHeader restaurantName={null} restaurantCuisine={null} restaurantId={null} />
         <Stack flex={1} alignItems="center" justifyContent="center" padding={32}>
-          <StyledText fontSize={15} color={COLORS.textMuted} textAlign="center">
+          <Text fontSize={15} color={COLORS.textMuted} textAlign="center">
             Your basket is empty — add something first.
-          </StyledText>
+          </Text>
         </Stack>
       </StyledPage>
     );
@@ -198,21 +198,21 @@ export default function CheckoutScreen() {
             >
               {selectedAddress ? (
                 <>
-                  <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+                  <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
                     {selectedAddress.label ?? "Address"}
-                  </StyledText>
-                  <StyledText fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
+                  </Text>
+                  <Text fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
                     {selectedAddress.address}
-                  </StyledText>
+                  </Text>
                 </>
               ) : (
                 <>
-                  <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+                  <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
                     Delivery address
-                  </StyledText>
-                  <StyledText fontSize={13} color={COLORS.error}>
+                  </Text>
+                  <Text fontSize={13} color={COLORS.error}>
                     No saved address — tap to add one
-                  </StyledText>
+                  </Text>
                 </>
               )}
             </SectionCard>
@@ -225,35 +225,35 @@ export default function CheckoutScreen() {
             >
               {cart.selectedSlot ? (
                 <>
-                  <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+                  <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
                     {formatDate(cart.selectedSlot.date)}
-                  </StyledText>
-                  <StyledText fontSize={13} color={COLORS.textMuted}>
+                  </Text>
+                  <Text fontSize={13} color={COLORS.textMuted}>
                     {cart.selectedSlot.windowStart}–{cart.selectedSlot.windowEnd}
-                  </StyledText>
+                  </Text>
                 </>
               ) : (
                 <>
-                  <StyledText fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
+                  <Text fontSize={15.5} fontWeight="800" color={COLORS.textPrimary}>
                     Delivery time
-                  </StyledText>
-                  <StyledText fontSize={13} color={COLORS.error}>
+                  </Text>
+                  <Text fontSize={13} color={COLORS.error}>
                     Choose a delivery slot
-                  </StyledText>
+                  </Text>
                 </>
               )}
             </SectionCard>
 
             {/* ── Notes ───────────────────────────────────────────────── */}
             <Stack gap={8}>
-              <StyledText
+              <Text
                 fontSize={13}
                 fontWeight="700"
                 color={COLORS.textMuted}
                 style={{ textTransform: "uppercase", letterSpacing: 0.5 }}
               >
                 Order notes (optional)
-              </StyledText>
+              </Text>
               <StyledTextInput
                 variant="outline"
                 size="lg"
@@ -268,14 +268,14 @@ export default function CheckoutScreen() {
 
             {/* ── Voucher ─────────────────────────────────────────────── */}
             <Stack gap={8}>
-              <StyledText
+              <Text
                 fontSize={13}
                 fontWeight="700"
                 color={COLORS.textMuted}
                 style={{ textTransform: "uppercase", letterSpacing: 0.5 }}
               >
                 Voucher
-              </StyledText>
+              </Text>
 
               {promo ? (
                 <Stack
@@ -291,9 +291,9 @@ export default function CheckoutScreen() {
                     <StyledShape size={32} cycle backgroundColor="#FFFFFF">
                       <Icon name="check" size={15} color={COLORS.primary} />
                     </StyledShape>
-                    <StyledText fontSize={13.5} fontWeight="700" color={COLORS.primary} style={{ flexShrink: 1 }}>
+                    <Text fontSize={13.5} fontWeight="700" color={COLORS.primary} style={{ flexShrink: 1 }}>
                       {promo.code} applied — {formatMoney(promo.discountCents)} off
-                    </StyledText>
+                    </Text>
                   </Stack>
                   <StyledPressable
                     onPress={() => {
@@ -301,9 +301,9 @@ export default function CheckoutScreen() {
                       setPromoInput("");
                     }}
                   >
-                    <StyledText fontSize={13} fontWeight="600" color={COLORS.textMuted}>
+                    <Text fontSize={13} fontWeight="600" color={COLORS.textMuted}>
                       Remove
-                    </StyledText>
+                    </Text>
                   </StyledPressable>
                 </Stack>
               ) : (
@@ -350,13 +350,12 @@ export default function CheckoutScreen() {
                       {validatePromo.isPending ? (
                         <Spinner size={18} color={COLORS.white} />
                       ) : (
-                        <StyledText
-                          fontSize={14}
-                          fontWeight="700"
+                        <Text
+                          variant="button"
                           color={promoInput.trim() ? COLORS.white : COLORS.textMuted}
                         >
                           Apply
-                        </StyledText>
+                        </Text>
                       )}
                     </Stack>
                   </ScalePressable>
@@ -369,9 +368,9 @@ export default function CheckoutScreen() {
         {/* ── Price breakdown ─────────────────────────────────────── */}
         <Animated.View style={summaryAnim}>
           <Stack gap={14} padding={20} borderRadius={26} backgroundColor={COLORS.bgCard} marginTop={16} style={[SHADOW_CARD, { elevation: 1.5 }]}>
-            <StyledText fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
+            <Text fontSize={16} fontWeight="800" color={COLORS.textPrimary}>
               Order summary
-            </StyledText>
+            </Text>
             <SummaryRow icon="shopping-bag" label="Subtotal" value={formatMoney(cart.subtotalCents)} />
             <SummaryRow icon="truck" label="Delivery fee (est.)" value={formatMoney(deliveryFeeCents)} />
             {discountCents > 0 && (
@@ -381,9 +380,9 @@ export default function CheckoutScreen() {
               <SummaryRow label="Estimated total" value={formatMoney(estimatedTotalCents)} bold />
             </Stack>
             {belowMinimum > 0 && (
-              <StyledText fontSize={12} color={COLORS.warning}>
+              <Text variant="bodySmall" color={COLORS.warning}>
                 Add {formatMoney(belowMinimum)} more to meet this restaurant's minimum order.
-              </StyledText>
+              </Text>
             )}
           </Stack>
         </Animated.View>
@@ -393,19 +392,19 @@ export default function CheckoutScreen() {
       <Stack paddingHorizontal={16} paddingTop={4} paddingBottom={Math.max(insets.bottom, 16)}>
         <Stack backgroundColor={COLORS.bgCard} borderRadius={28} padding={20} gap={14} style={[SHADOW_CARD, { elevation: 1.5 }]}>
           {statusMessage && (
-            <StyledText fontSize={13} color={COLORS.textMuted} textAlign="center">
+            <Text fontSize={13} color={COLORS.textMuted} textAlign="center">
               {statusMessage}
-            </StyledText>
+            </Text>
           )}
 
           <Stack horizontal alignItems="center" justifyContent="space-between" gap={14}>
             <Stack gap={2}>
-              <StyledText fontSize={12} color={COLORS.textMuted}>
+              <Text variant="bodySmall" color={COLORS.textMuted}>
                 Total to pay
-              </StyledText>
-              <StyledText fontSize={24} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
+              </Text>
+              <Text fontSize={24} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.4 }}>
                 {formatMoney(estimatedTotalCents)}
-              </StyledText>
+              </Text>
             </Stack>
 
             <ScalePressable onPress={handlePay} disabled={!canPay} toValue={0.96}>
@@ -434,9 +433,9 @@ export default function CheckoutScreen() {
                   <Spinner size={18} color={canPay ? COLORS.white : COLORS.textMuted} />
                 ) : (
                   <Stack horizontal alignItems="center" gap={7}>
-                    <StyledText fontSize={16} fontWeight="700" color={canPay ? COLORS.white : COLORS.textMuted}>
+                    <Text fontSize={16} fontWeight="700" color={canPay ? COLORS.white : COLORS.textMuted}>
                       Pay {formatMoney(estimatedTotalCents)}
-                    </StyledText>
+                    </Text>
                     <Icon name="arrow-right" size={16} color={canPay ? COLORS.white : COLORS.textMuted} />
                   </Stack>
                 )}
@@ -447,15 +446,15 @@ export default function CheckoutScreen() {
           <Stack horizontal alignItems="center" justifyContent="center" gap={16}>
             <Stack horizontal alignItems="center" gap={5}>
               <Icon name="shield" size={12} color={COLORS.textMuted} />
-              <StyledText fontSize={11.5} color={COLORS.textMuted}>
+              <Text fontSize={11.5} color={COLORS.textMuted}>
                 Secure checkout
-              </StyledText>
+              </Text>
             </Stack>
             <Stack horizontal alignItems="center" gap={5}>
               <Icon name="lock" size={12} color={COLORS.textMuted} />
-              <StyledText fontSize={11.5} color={COLORS.textMuted}>
+              <Text fontSize={11.5} color={COLORS.textMuted}>
                 Encrypted and safe payments
-              </StyledText>
+              </Text>
             </Stack>
           </Stack>
         </Stack>
@@ -494,12 +493,12 @@ export default function CheckoutScreen() {
                       <Icon name="map-pin" size={17} color={COLORS.primary} />
                     </StyledShape>
                     <Stack flex={1} gap={2}>
-                      <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+                      <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
                         {addr.label ?? "Address"} {addr.isDefault ? "· Default" : ""}
-                      </StyledText>
-                      <StyledText fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
+                      </Text>
+                      <Text fontSize={13} color={COLORS.textMuted} numberOfLines={1}>
                         {addr.address}
-                      </StyledText>
+                      </Text>
                     </Stack>
                     {selected && <Icon name="check-circle" size={20} color={COLORS.primary} />}
                   </Stack>
@@ -517,9 +516,9 @@ export default function CheckoutScreen() {
             }}
           >
             <Stack padding={14} alignItems="center">
-              <StyledText fontSize={14} fontWeight="700" color={COLORS.primary}>
+              <Text variant="button" color={COLORS.primary}>
                 + Add a new address
-              </StyledText>
+              </Text>
             </Stack>
           </ScalePressable>
         </Stack>
@@ -559,12 +558,12 @@ export default function CheckoutScreen() {
                       <Icon name="clock" size={17} color={COLORS.primary} />
                     </StyledShape>
                     <Stack flex={1} gap={2}>
-                      <StyledText fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
+                      <Text fontSize={14} fontWeight="700" color={COLORS.textPrimary}>
                         {formatDate(slot.date)} · {slot.windowStart}–{slot.windowEnd}
-                      </StyledText>
-                      <StyledText fontSize={12} color={disabled ? COLORS.error : COLORS.textMuted}>
+                      </Text>
+                      <Text variant="bodySmall" color={disabled ? COLORS.error : COLORS.textMuted}>
                         {disabled ? "Full" : slot.status === "limited" ? "Almost full" : "Available"}
-                      </StyledText>
+                      </Text>
                     </Stack>
                     {selected && <Icon name="check-circle" size={20} color={COLORS.primary} />}
                   </Stack>
@@ -605,9 +604,9 @@ function CheckoutHeader({
               <Icon name="chevron-left" size={20} color={COLORS.textPrimary} />
             </Stack>
           </ScalePressable>
-          <StyledText fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
+          <Text fontSize={18} fontWeight="800" color={COLORS.textPrimary} style={{ letterSpacing: -0.2 }}>
             Checkout
-          </StyledText>
+          </Text>
           {/* Balances the back button so the title stays centered. */}
           <Stack width={40} height={40} />
         </Stack>
@@ -619,10 +618,10 @@ function CheckoutHeader({
             style={{ alignSelf: "center" }}
           >
             <Stack horizontal alignItems="center" gap={6}>
-              <StyledText fontSize={14}>{cuisineEmoji(restaurantCuisine ?? "")}</StyledText>
-              <StyledText fontSize={14.5} fontWeight="700" color={COLORS.textSecondary}>
+              <Text variant="body">{cuisineEmoji(restaurantCuisine ?? "")}</Text>
+              <Text fontSize={14.5} fontWeight="700" color={COLORS.textSecondary}>
                 {restaurantName}
-              </StyledText>
+              </Text>
               <Icon name="chevron-right" size={14} color={COLORS.textMuted} />
             </Stack>
           </ScalePressable>
@@ -706,17 +705,17 @@ function SummaryRow({
     <Stack horizontal alignItems="center" justifyContent="space-between">
       <Stack horizontal alignItems="center" gap={8}>
         {icon && <Icon name={icon as any} size={14} color={COLORS.primary} />}
-        <StyledText fontSize={bold ? 15.5 : 14} fontWeight={bold ? "800" : "400"} color={COLORS.textSecondary}>
+        <Text fontSize={bold ? 15.5 : 14} fontWeight={bold ? "800" : "400"} color={COLORS.textSecondary}>
           {label}
-        </StyledText>
+        </Text>
       </Stack>
-      <StyledText
+      <Text
         fontSize={bold ? 19 : 14}
         fontWeight={bold ? "800" : "700"}
         color={valueColor ?? (bold ? COLORS.primary : COLORS.textPrimary)}
       >
         {value}
-      </StyledText>
+      </Text>
     </Stack>
   );
 }
